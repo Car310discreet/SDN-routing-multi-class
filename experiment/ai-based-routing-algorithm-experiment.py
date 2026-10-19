@@ -27,6 +27,17 @@ net = None
 activeThreadList = []
 trafficTime = 0
 
+NUM_CANDIDATE_PATHS = 5
+PROBE_PRIORITY = 40000      # probe flows (ICMP + TCP only) override the selected path during probing
+PROBE_IP_PROTOS = [1, 6]    # ICMP for ping, TCP for iperf3; the UDP video keeps using the selected path
+IPERF_PORT = "5555"
+# Re-run the routing algorithm every N seconds during video transmission (0 = disabled).
+# A probe cycle takes ~4-5 min and saturates the client's access link, so it degrades the
+# video it is meant to protect; it is therefore opt-in: --reroute-interval SECONDS
+rerouteInterval = 0
+selectedPathFlows = []
+selectedPathIndex = None
+
 class NsfnetTopo(Topo):
   
     def build( self, **params ):
@@ -128,7 +139,7 @@ def startNetwork():
     global net
     global activeThreadList
     global trafficTime
-    trafficTime = 600
+    trafficTime = 900 # must outlast path probing (~5 min), measurement and video so background traffic stays present
     activeThreadList = []
     net = None
 
@@ -147,6 +158,7 @@ def startNetwork():
 
     # Configure controller
     info('[INFO]****** Configuring Controller *****\n')
+    floodlightRestApi.deleteAllFlows() # static flows persist in Floodlight across runs
     floodlightRestApi.setRoutingMetric("hopcount")
     # floodlightRestApi.enableSwitchStats()
 
@@ -182,8 +194,11 @@ def startNetwork():
     info(f'[INFO]****** Active thread count: {threading.active_count()}\n')
 
     routingAlgorithm(src_ipv4="10.0.0.1", dst_ipv4="10.0.0.9")
-  
 
+    # Same 60 s RTT / throughput measurement as the Floodlight baselines (paper Figs. 16-17)
+    info(f'[INFO]****** Statistics Collecting *****\n')
+    getPingStats("h0", "h8", getStats=True)
+    getThroughput(sender = "h8", receiver = "h0", bandWidth="0")
 
     # Start Video Stream
     info(f'[INFO]****** Video Stream Starting *****\n')
@@ -232,7 +247,13 @@ def startNetwork():
     info(f'[INFO]****** Completed in {diff} seconds *****\n')
     # sys.exit()
 
-def routingAlgorithm(src_ipv4, dst_ipv4):
+def routingAlgorithm(src_ipv4, dst_ipv4, stopEvent=None):
+    """
+        AI-based routing algorithm (paper Table 2). Probes each candidate path with
+        ping + iperf3 + NFStream, predicts its traffic level and installs the path
+        with the lowest predicted level. Returns the selected path index, or None if
+        stopEvent was set before all candidates were probed.
+    """
     model_path = os.path.join(get_project_dir(), 'models', 'logistic_regression_model.pkl')
     loaded_model = joblib.load(model_path)
     paths = []
@@ -240,8 +261,12 @@ def routingAlgorithm(src_ipv4, dst_ipv4):
     src_switch_dpid, _ = floodlightRestApi.getSwitchAndPortByHost(src_ipv4)
     dst_switch_dpid, _ = floodlightRestApi.getSwitchAndPortByHost(dst_ipv4)
 
-    for i in range(5):
-        flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=5, path_index=i)
+    for i in range(NUM_CANDIDATE_PATHS):
+        if stopEvent is not None and stopEvent.is_set():
+            info('[INFO]****** Routing cycle aborted *****\n')
+            return None
+        flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=NUM_CANDIDATE_PATHS, path_index=i,
+                                             name_prefix="probe", priority=PROBE_PRIORITY, ip_protos=PROBE_IP_PROTOS)
         info(f'[INFO]****** Testing The Path {i} Performance *****\n')
         path_statistics = []
     
@@ -299,7 +324,7 @@ def routingAlgorithm(src_ipv4, dst_ipv4):
         prediction_value = float(prediction[0]) if hasattr(prediction, '__len__') and len(prediction) > 0 else float(prediction)
         print(f"[INFO] Path {i} prediction ----> {prediction_value}")
 
-        candidate_path, candidate_latency, candidate_hop_count = floodlightRestApi.getPathById(src_switch_dpid, dst_switch_dpid, 5, i)
+        candidate_path, candidate_latency, candidate_hop_count = floodlightRestApi.getPathById(src_switch_dpid, dst_switch_dpid, NUM_CANDIDATE_PATHS, i)
         print(f"[INFO] Candidate path {i} details -> latency={candidate_latency} ms, hop_count={candidate_hop_count}, path={candidate_path}")
 
         paths.append({
@@ -314,32 +339,59 @@ def routingAlgorithm(src_ipv4, dst_ipv4):
             floodlightRestApi.deleteFlowByName(flow)
         sleep(1)
 
-    print(f"[INFO] Calculating best path based on traffic value from 5 candidate paths...")
+    print(f"[INFO] Calculating best path based on traffic value from {len(paths)} candidate paths...")
     best_path = paths[0]
     for candidate in paths[1:]:
         if candidate['pathTrafficValue'] < best_path['pathTrafficValue']:
             best_path = candidate
 
     print(f"[INFO] Best path selected: index={best_path['pathIndex']}, traffic_score={best_path['pathTrafficValue']}, latency={best_path['latency']} ms, hop_count={best_path['hopCount']}, path={best_path['path']}")
-    print(f"[INFO] Setting best path {best_path['pathIndex']} for traffic between {src_ipv4} and {dst_ipv4}")
-    path_index = best_path['pathIndex']
-    flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=5, path_index=path_index)
+    setSelectedPath(src_ipv4, dst_ipv4, best_path['pathIndex'])
+    return best_path['pathIndex']
+
+def setSelectedPath(src_ipv4, dst_ipv4, path_index):
+    """Install the selected path for all IPv4 traffic between the hosts, replacing the previous one."""
+    global selectedPathFlows, selectedPathIndex
+    if path_index == selectedPathIndex:
+        print(f"[INFO] Keeping current path {path_index} for traffic between {src_ipv4} and {dst_ipv4}")
+        return
+    print(f"[INFO] Setting best path {path_index} for traffic between {src_ipv4} and {dst_ipv4}")
+    # Push the new path before removing stale entries so traffic is never left without a route
+    flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=NUM_CANDIDATE_PATHS, path_index=path_index, name_prefix="best")
+    for flow in selectedPathFlows:
+        if flow not in flows:
+            floodlightRestApi.deleteFlowByName(flow)
+    selectedPathFlows = flows
+    selectedPathIndex = path_index
+
+class RerouteMonitor(Thread):
+    """Periodically re-executes the routing algorithm while the video is being transmitted."""
+    def __init__(self, src_ipv4: str, dst_ipv4: str, interval: float):
+        Thread.__init__(self, daemon=True)
+        self.src_ipv4 = src_ipv4
+        self.dst_ipv4 = dst_ipv4
+        self.interval = interval
+        self.stopEvent = threading.Event()
+
+    def run(self):
+        while not self.stopEvent.wait(self.interval):
+            info('[INFO]****** Periodic re-routing: re-evaluating candidate paths *****\n')
+            routingAlgorithm(self.src_ipv4, self.dst_ipv4, stopEvent=self.stopEvent)
+
+    def stop(self):
+        self.stopEvent.set()
 
 
 def calculatePSNR():
-    host = net.getNodeByName("h9") # random host
     project_dir = get_project_dir()
     videoSource = os.path.join(project_dir, "assets", "surreal.ts")
     outputSource = os.path.join(project_dir, "records", "input.ts")
     if not os.path.exists(outputSource):
         info(f"[WARN] Output video file {outputSource} not found for PSNR calculation.\n")
         return 0.0
-    command = f"ffmpeg -i {videoSource} -i {outputSource} -lavfi '[0:v][1:v]psnr' -f null -"
-    hostThread = HostCommand(host, command)
-    hostThread.daemon = True
-    hostThread.start()
-    hostThread.join()
-    psnrResult = hostThread.result or ""
+    # Offline file comparison: run in the root namespace, Mininet host shells may be busy with traffic
+    command = ["ffmpeg", "-hide_banner", "-i", videoSource, "-i", outputSource, "-lavfi", "[0:v][1:v]psnr", "-f", "null", "-"]
+    psnrResult = subprocess.run(command, capture_output=True, text=True).stderr
     target_line = ""
     for line in psnrResult.split("\n"):
         if "average:" in line:
@@ -356,19 +408,15 @@ def calculatePSNR():
     return psnrVal
 
 def calculateSSIM():
-    host = net.getNodeByName("h9") # random host
     project_dir = get_project_dir()
     videoSource = os.path.join(project_dir, "assets", "surreal.ts")
     outputSource = os.path.join(project_dir, "records", "input.ts")
     if not os.path.exists(outputSource):
         info(f"[WARN] Output video file {outputSource} not found for SSIM calculation.\n")
         return 0.0, 0.0
-    command = f"ffmpeg -i {videoSource} -i {outputSource} -lavfi '[0:v][1:v]ssim' -f null -"
-    hostThread = HostCommand(host, command)
-    hostThread.daemon = True
-    hostThread.start()
-    hostThread.join()
-    ssimResult = hostThread.result or ""
+    # Offline file comparison: run in the root namespace, Mininet host shells may be busy with traffic
+    command = ["ffmpeg", "-hide_banner", "-i", videoSource, "-i", outputSource, "-lavfi", "[0:v][1:v]ssim", "-f", "null", "-"]
+    ssimResult = subprocess.run(command, capture_output=True, text=True).stderr
     target_line = ""
     for line in ssimResult.split("\n"):
         if "All:" in line:
@@ -387,10 +435,7 @@ def calculateSSIM():
     return firstReulst, secondResult
 
 def get_project_dir():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if os.path.exists(os.path.join(base, "assets")):
-        return base
-    return "/home/rahul/cnproj/AI-based-Routing-and-Traffic-Classification-in-SDN"
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 
@@ -403,9 +448,17 @@ def deleteFile(fileName: str):
             subprocess.run(['bash', script_path, fileName])
 
 def cleanMininet():
-    script_path = os.path.join(get_project_dir(), 'clear_resources', 'mininet.sh')
-    if os.path.exists(script_path):
-        subprocess.run(['bash', script_path])
+    global net
+    if net is None:
+        return
+    stoppingNet, net = net, None
+    # Background iperf3 commands outlive the experiment; interrupt them, net.stop() needs the host shells
+    for host in stoppingNet.hosts:
+        if host.waiting:
+            host.sendInt()
+    for thread in activeThreadList:
+        thread.join(timeout=10)
+    stoppingNet.stop()
 
 def startVideoPreview(videoPath: str):
     if not os.path.exists(videoPath):
@@ -446,37 +499,36 @@ def startStream(sender:str, receiver:str):
     outputSource = os.path.join(records_dir, "input.ts")
     receiverUrl = f"udp://{receiverNode.IP()}:{port}"
 
-    senderCommand = f"ffmpeg -re -i {videoSource} -c copy -f mpegts {receiverUrl} > sender.log 2>&1"
-    receiverCommand = f"ffmpeg -y -i {receiverUrl} -c copy {outputSource} > receiver.log 2>&1"
-
-    senderThread = HostCommand(senderNode, senderCommand)
-    receiverThread = HostCommand(receiverNode, receiverCommand) 
-    senderThread.daemon = True
-    receiverThread.daemon = True
+    senderCommand = ["ffmpeg", "-re", "-i", videoSource, "-c", "copy", "-f", "mpegts", receiverUrl]
+    receiverCommand = ["ffmpeg", "-y", "-i", receiverUrl, "-c", "copy", outputSource]
 
     previewProcess = startVideoPreview(videoSource)
 
-    receiverThread.start()
-    sleep(0.5)
-    senderThread.start()
+    # popen (not Node.cmd) keeps the hosts' shells free, so the re-route monitor can probe h0/h8
+    with open("receiver.log", "w") as receiverLog, open("sender.log", "w") as senderLog:
+        receiverProcess = receiverNode.popen(receiverCommand, stdout=receiverLog, stderr=subprocess.STDOUT)
+        sleep(0.5)
+        senderProcess = senderNode.popen(senderCommand, stdout=senderLog, stderr=subprocess.STDOUT)
 
-    senderThread.join()
-    sleep(2)
-    info(f'[INFO]****** Ffmpeg Port Killing *****\n')
-    killFfmpegPorts(senderNode, receiverNode)
-    receiverThread.join()  
+        monitor = None
+        if rerouteInterval > 0:
+            monitor = RerouteMonitor(receiverNode.IP(), senderNode.IP(), rerouteInterval)
+            monitor.start()
 
-def killFfmpegPorts(senderNode, receiverNode):
-    import subprocess
-    subprocess.run("pkill -9 -x ffplay", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("pkill -9 -x ffmpeg", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for node in (receiverNode, senderNode):
-        if node and getattr(node, 'waiting', False):
-            try:
-                node.sendInt()
-            except Exception:
-                pass
-    sleep(0.5)
+        senderProcess.wait()
+        if monitor is not None:
+            monitor.stop()
+        sleep(2)
+        info(f'[INFO]****** Stopping video receiver *****\n')
+        receiverProcess.terminate() # ffmpeg finalizes the output file on SIGTERM
+        try:
+            receiverProcess.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            receiverProcess.kill()
+        if previewProcess is not None:
+            previewProcess.terminate()
+        if monitor is not None:
+            monitor.join()
 
 def getPingStats(sender: str, receiver: str, getStats = False) -> tuple[float, float]:
     senderNode, receiverNode = net.getNodeByName(sender), net.getNodeByName(receiver)
@@ -485,7 +537,7 @@ def getPingStats(sender: str, receiver: str, getStats = False) -> tuple[float, f
 
     if getStats == True:
         packetCount = "60"
-        command = f"ping {receiverIpv4} -c {packetCount} > output2_v3.txt"
+        command = f"ping {receiverIpv4} -c {packetCount} > output_ai_ping.txt"
     else:
         packetCount = "500"
         command = f"ping {receiverIpv4} -c {packetCount} -f"
@@ -547,7 +599,7 @@ def getThroughput(sender: str, receiver: str, bandWidth: str):
     time = "60"
 
     serverCommand = f"iperf3 -s -p {port} -i 1 -1"
-    clientCommand = f"iperf3 -c {server.IP()} -p {port} -b {bandWidth} -R -t {time} > output_v3.txt"
+    clientCommand = f"iperf3 -c {server.IP()} -p {port} -b {bandWidth} -R -t {time} > output_ai_throughput.txt"
 
     serverThread = HostCommand(server, serverCommand)
     serverThread.daemon = True
@@ -584,7 +636,10 @@ class StreamListener(Thread):
                         idle_timeout=15)
         self.stream = []
         for flow in flow_streamer:
-            if (flow.src_ip in ("10.0.0.1", "10.0.0.9") and flow.dst_ip in ("10.0.0.1", "10.0.0.9")):
+            # The iperf3 TCP connection between client and server (the same flow the training data was
+            # collected from); never the UDP video stream or ICMP probes
+            if (flow.src_ip in ("10.0.0.1", "10.0.0.9") and flow.dst_ip in ("10.0.0.1", "10.0.0.9")
+                    and flow.protocol == 6 and int(IPERF_PORT) in (flow.src_port, flow.dst_port)):
                 self.stream.append(flow)
                 print("[INFO] NFStream captured flow: ", flow.src_ip, " -> ", flow.dst_ip)
                 break
@@ -1098,5 +1153,14 @@ def setTrafficPaths():
     #-------------------------------
     
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description="AI-based routing experiment (AIRSDN)")
+    parser.add_argument("--reroute-interval", type=float, default=0,
+                        help="re-run the routing algorithm every N seconds during video transmission (0 = disabled)")
+    args = parser.parse_args()
+    rerouteInterval = args.reroute_interval
     setLogLevel('info')
-    startNetwork()
+    try:
+        startNetwork()
+    finally:
+        cleanMininet() # also tear the network down if the experiment crashed
