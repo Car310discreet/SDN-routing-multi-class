@@ -19,13 +19,16 @@ import floodlightRestApi
 import subprocess
 from nfstream import NFStreamer
 import pandas as pd
-import os
 import numpy as np
-import xgboost as xgb
 
 net = None
 activeThreadList = []
 trafficTime = 0
+# Floodlight routing metric for the baseline run:
+#   hopcount    -> default Floodlight routing (paper baseline 1)
+#   latency     -> QoS-aware routing (paper baseline 2)
+#   utilization -> QoS-aware routing using link bandwidth utilization
+routingMetric = "latency"
 
 class NsfnetTopo(Topo):
     
@@ -128,7 +131,7 @@ def startNetwork():
     global net
     global activeThreadList
     global trafficTime
-    trafficTime = 600
+    trafficTime = 900 # must outlast the whole experiment so background traffic is present during measurement and video
     activeThreadList = []
     net = None
 
@@ -147,8 +150,11 @@ def startNetwork():
 
     # Configure controller
     info('[INFO]****** Configuring Controller *****\n')
-    floodlightRestApi.setRoutingMetric("latency")
-    # floodlightRestApi.enableSwitchStats()
+    floodlightRestApi.deleteAllFlows() # static flows persist in Floodlight across runs
+    info(f'[INFO]****** Routing metric: {routingMetric} *****\n')
+    if routingMetric == "utilization":
+        floodlightRestApi.enableSwitchStats()
+    floodlightRestApi.setRoutingMetric(routingMetric)
 
     info('[INFO]****** Testing Connectivity Between Hosts *****\n')
     net.pingAll()
@@ -237,19 +243,15 @@ def startNetwork():
     # sys.exit()
 
 def calculatePSNR():
-    host = net.getNodeByName("h9") # random host
     project_dir = get_project_dir()
     videoSource = os.path.join(project_dir, "assets", "surreal.ts")
     outputSource = os.path.join(project_dir, "records", "input.ts")
     if not os.path.exists(outputSource):
         info(f"[WARN] Output video file {outputSource} not found for PSNR calculation.\n")
         return 0.0
-    command = f"ffmpeg -i {videoSource} -i {outputSource} -lavfi '[0:v][1:v]psnr' -f null -"
-    hostThread = HostCommand(host, command)
-    hostThread.daemon = True
-    hostThread.start()
-    hostThread.join()
-    psnrResult = hostThread.result or ""
+    # Offline file comparison: run in the root namespace, Mininet host shells may be busy with traffic
+    command = ["ffmpeg", "-hide_banner", "-i", videoSource, "-i", outputSource, "-lavfi", "[0:v][1:v]psnr", "-f", "null", "-"]
+    psnrResult = subprocess.run(command, capture_output=True, text=True).stderr
     target_line = ""
     for line in psnrResult.split("\n"):
         if "average:" in line:
@@ -266,19 +268,15 @@ def calculatePSNR():
     return psnrVal
 
 def calculateSSIM():
-    host = net.getNodeByName("h9") # random host
     project_dir = get_project_dir()
     videoSource = os.path.join(project_dir, "assets", "surreal.ts")
     outputSource = os.path.join(project_dir, "records", "input.ts")
     if not os.path.exists(outputSource):
         info(f"[WARN] Output video file {outputSource} not found for SSIM calculation.\n")
         return 0.0, 0.0
-    command = f"ffmpeg -i {videoSource} -i {outputSource} -lavfi '[0:v][1:v]ssim' -f null -"
-    hostThread = HostCommand(host, command)
-    hostThread.daemon = True
-    hostThread.start()
-    hostThread.join()
-    ssimResult = hostThread.result or ""
+    # Offline file comparison: run in the root namespace, Mininet host shells may be busy with traffic
+    command = ["ffmpeg", "-hide_banner", "-i", videoSource, "-i", outputSource, "-lavfi", "[0:v][1:v]ssim", "-f", "null", "-"]
+    ssimResult = subprocess.run(command, capture_output=True, text=True).stderr
     target_line = ""
     for line in ssimResult.split("\n"):
         if "All:" in line:
@@ -297,93 +295,7 @@ def calculateSSIM():
     return firstReulst, secondResult
 
 def get_project_dir():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if os.path.exists(os.path.join(base, "assets")):
-        return base
-    return "/home/rahul/cnproj/AI-based-Routing-and-Traffic-Classification-in-SDN"
-
-def routingAlgorithm(src_ipv4, dst_ipv4):
-    model_path = os.path.join(get_project_dir(), 'models', 'xgboost_binary_classification.json')
-    loaded_model = xgb.XGBClassifier()
-    loaded_model.load_model(model_path)
-    paths = []
-
-    for i in range(5):
-        flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=5, path_index=i)
-        info(f'[INFO]****** Testing The Path {i} Performance *****\n')
-        path_statistics = []
-    
-        info(f'[INFO]****** PATH = {i} Ping Stats *****\n')
-        avgRTT, packetLoss = getPingStats("h0", "h8")
-        path_statistics.append(avgRTT)
-        path_statistics.append(packetLoss)
-        print(f"""*** Average RTT: {avgRTT}\nPacket Loss: {packetLoss}""")
-
-        # Iperf tcp stats
-        info(f'[INFO]****** Path {i} Iperf TCP Stats *****\n')
-        iperfResult = generateTraffic(sender = "h8", receiver = "h0", getStats = True, bandWidth="0")
-        tcpFlowResult = iperfResult[0]
-
-        try:
-            sum_received = tcpFlowResult.get("sum_received", {}) or tcpFlowResult.get("sum", {})
-            sum_sent = tcpFlowResult.get("sum_sent", {}) or tcpFlowResult.get("sum", {})
-            bits_per_sec = float(sum_received.get("bits_per_second", 0.0))
-            retransmits = int(sum_sent.get("retransmits", 0))
-            cpu_util = tcpFlowResult.get("cpu_utilization_percent", {})
-            cpu_host_total = float(cpu_util.get("host_total", 0.0))
-            cpu_host_system = float(cpu_util.get("host_system", 0.0))
-        except (KeyError, TypeError, ValueError):
-            bits_per_sec = 0.0
-            retransmits = 0
-            cpu_host_total = 0.0
-            cpu_host_system = 0.0
-
-        path_statistics.append(bits_per_sec)
-        path_statistics.append(100 - ((bits_per_sec / 10000000) * 100))
-        path_statistics.append(retransmits)
-        path_statistics.append(cpu_host_total)
-        path_statistics.append(cpu_host_system)
-
-        nfstreamResult = iperfResult[1]
-        if len(nfstreamResult) > 0:
-            flow_data = nfstreamResult[0]
-            path_statistics.append(flow_data.bidirectional_duration_ms)
-            path_statistics.append(flow_data.src2dst_duration_ms)
-            path_statistics.append(flow_data.dst2src_duration_ms)
-            path_statistics.append(flow_data.bidirectional_mean_piat_ms)
-            path_statistics.append(flow_data.bidirectional_stddev_piat_ms)
-            path_statistics.append(flow_data.bidirectional_max_piat_ms)
-            path_statistics.append(flow_data.src2dst_mean_piat_ms)
-            path_statistics.append(flow_data.src2dst_stddev_piat_ms)
-            path_statistics.append(flow_data.src2dst_max_piat_ms)
-            path_statistics.append(flow_data.dst2src_mean_piat_ms)
-            path_statistics.append(flow_data.dst2src_stddev_piat_ms)
-            path_statistics.append(flow_data.dst2src_max_piat_ms)
-        else:
-            path_statistics.extend([0] * 12)
-
-        path_statistics = np.array([path_statistics])
-        prediction = loaded_model.predict(path_statistics)
-        print(f"Path {i} prediction ----> " , prediction)
-
-        paths.append({
-            'pathIndex': i,
-            'pathTrafficValue': prediction
-        })
-
-        for flow in flows:
-            floodlightRestApi.deleteFlowByName(flow)
-        sleep(1)
-
-    min = paths[0]
-    for i in range(1, len(paths)):
-        if(paths[i]['pathTrafficValue'] < min['pathTrafficValue']):
-            min = paths[i]
-
-    path_index = min['pathIndex']
-    flows = floodlightRestApi.pathPusher(src_ipv4, dst_ipv4, num_paths=5, path_index=path_index)
-
-
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def deleteFile(fileName: str):
     if os.path.exists(fileName):
@@ -394,9 +306,18 @@ def deleteFile(fileName: str):
             subprocess.run(['bash', script_path, fileName])
 
 def cleanMininet():
-    script_path = os.path.join(get_project_dir(), 'clear_resources', 'mininet.sh')
-    if os.path.exists(script_path):
-        subprocess.run(['bash', script_path])
+    global net
+    if net is None:
+        return
+    stoppingNet, net = net, None
+    # Background iperf3 commands outlive the experiment; interrupt them, net.stop() needs the host shells
+    for host in stoppingNet.hosts:
+        if host.waiting:
+            host.sendInt()
+    for thread in activeThreadList:
+        thread.join(timeout=10)
+    stoppingNet.stop()
+
 def startVideoPreview(videoPath: str):
     if not os.path.exists(videoPath):
         info(f'[WARN]****** Video preview file not found: {videoPath} *****\n')
@@ -441,25 +362,24 @@ def startStream(sender: str, receiver: str):
     outputSource = os.path.join(records_dir, "input.ts")
     receiverUrl = f"udp://{receiverNode.IP()}:{port}"
 
-    senderCommand = f"ffmpeg -re -i {videoSource} -c copy -f mpegts {receiverUrl} > sender.log 2>&1"
-    receiverCommand = f"ffmpeg -y -i {receiverUrl} -c copy {outputSource} > receiver.log 2>&1"
-
-    senderThread = HostCommand(senderNode, senderCommand)
-    receiverThread = HostCommand(receiverNode, receiverCommand)
-    senderThread.daemon = True
-    receiverThread.daemon = True
+    senderCommand = ["ffmpeg", "-re", "-i", videoSource, "-c", "copy", "-f", "mpegts", receiverUrl]
+    receiverCommand = ["ffmpeg", "-y", "-i", receiverUrl, "-c", "copy", outputSource]
 
     previewProcess = startVideoPreview(videoSource)
 
-    receiverThread.start()
-    sleep(0.5)
-    senderThread.start()
+    with open("receiver.log", "w") as receiverLog, open("sender.log", "w") as senderLog:
+        receiverProcess = receiverNode.popen(receiverCommand, stdout=receiverLog, stderr=subprocess.STDOUT)
+        sleep(0.5)
+        senderProcess = senderNode.popen(senderCommand, stdout=senderLog, stderr=subprocess.STDOUT)
 
-    senderThread.join()
-    sleep(2)
-    info(f'[INFO]****** Ffmpeg Port Killing *****\n')
-    killFfmpegPorts(senderNode, receiverNode)
-    receiverThread.join()
+        senderProcess.wait()
+        sleep(2)
+        info(f'[INFO]****** Stopping video receiver *****\n')
+        receiverProcess.terminate() # ffmpeg finalizes the output file on SIGTERM
+        try:
+            receiverProcess.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            receiverProcess.kill()
 
     if previewProcess is not None:
         info(f'[INFO]****** Closing video preview window *****\n')
@@ -471,18 +391,6 @@ def startStream(sender: str, receiver: str):
         except Exception as exc:
             info(f'[WARN]****** Error closing preview window: {exc} *****\n')
 
-def killFfmpegPorts(senderNode, receiverNode):
-    import subprocess
-    subprocess.run("pkill -9 -x ffplay", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("pkill -9 -x ffmpeg", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for node in (receiverNode, senderNode):
-        if node and getattr(node, 'waiting', False):
-            try:
-                node.sendInt()
-            except Exception:
-                pass
-    sleep(0.5)
-
 def getPingStats(sender: str, receiver: str, getStats = False) -> tuple[float, float]:
     senderNode, receiverNode = net.getNodeByName(sender), net.getNodeByName(receiver)
     receiverIpv4 = receiverNode.IP()
@@ -490,7 +398,7 @@ def getPingStats(sender: str, receiver: str, getStats = False) -> tuple[float, f
 
     if getStats == True:
         packetCount = "60"
-        command = f"ping {receiverIpv4} -c {packetCount} > output_qos_ping_v1.txt"
+        command = f"ping {receiverIpv4} -c {packetCount} > output_{routingMetric}_ping.txt"
     else:
         packetCount = "500"
         command = f"ping {receiverIpv4} -c {packetCount} -f"
@@ -552,7 +460,7 @@ def getThroughput(sender: str, receiver: str, bandWidth: str):
     time = "60"
 
     serverCommand = f"iperf3 -s -p {port} -i 1 -1"
-    clientCommand = f"iperf3 -c {server.IP()} -p {port} -b {bandWidth} -R -t {time} > output_qos_th_v1.txt"
+    clientCommand = f"iperf3 -c {server.IP()} -p {port} -b {bandWidth} -R -t {time} > output_{routingMetric}_throughput.txt"
 
     serverThread = HostCommand(server, serverCommand)
     serverThread.daemon = True
@@ -1103,5 +1011,10 @@ def setTrafficPaths():
     #-------------------------------
     
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        routingMetric = sys.argv[1]
     setLogLevel('info')
-    startNetwork()
+    try:
+        startNetwork()
+    finally:
+        cleanMininet() # also tear the network down if the experiment crashed
