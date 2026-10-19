@@ -64,14 +64,21 @@ def getSwitchAndPortByHost(ipv4: str) -> tuple[str, str]:
     print("[INFO]****** GET METHOD RESULT *****\nSwitch Dpid: ", switch_dpid, "\nPort: ", port)
     return switch_dpid, port
 
-def pathPusher(src_host_ipv4:str, dst_host_ipv4:str, num_paths:int, path_index:int):
+def pathPusher(src_host_ipv4:str, dst_host_ipv4:str, num_paths:int, path_index:int,
+               name_prefix:str = "flow", priority:int = 32768, ip_protos:list = None):
+    """
+        Push bidirectional static flows for candidate path `path_index` between two hosts.
+        ip_protos: if given (e.g. [1, 6] for ICMP + TCP), the flows only match those IP
+                   protocols, so probe traffic can be steered without moving other traffic
+                   (e.g. the UDP video stream) between the same hosts.
+        Returns the names of the pushed flows.
+    """
     src_switch_dpid, src_switch_port = getSwitchAndPortByHost(src_host_ipv4)
     dst_switch_dpid, dst_switch_port = getSwitchAndPortByHost(dst_host_ipv4)
     flows = []
 
     path, latency, hop_count = getPathById(src_switch_dpid, dst_switch_dpid, num_paths, path_index)
 
-    #print(f"Hop Count: {hop_count}\nLatency: {latency}\nPath: {path}")
     path.insert(0,{'dpid': src_switch_dpid, 'port': str(src_switch_port)})
     path.append({'dpid': dst_switch_dpid, 'port': str(dst_switch_port)})
 
@@ -82,44 +89,51 @@ def pathPusher(src_host_ipv4:str, dst_host_ipv4:str, num_paths:int, path_index:i
         siwtch_input_port = path[i]["port"]
         siwtch_output_port = path[i+1]["port"]
 
-        flow_first_direction_name = f"flow_{switch_dpid}_{siwtch_input_port}_1"
-        flow_second_direction_name = f"flow_{switch_dpid}_{siwtch_output_port}_2"
-
         print("******** switch dpid: ", switch_dpid, " switch input port: ", siwtch_input_port, " switch output port: ", siwtch_output_port)
-        
-        first_direction = {
-        "switch": switch_dpid,
-        "name": flow_first_direction_name,
-        "cookie": "0",
-        "priority":"32768",
-        "eth_type" : "0x0800" ,
-        "ipv4_src": src_host_ipv4,
-        "ipv4_dst": dst_host_ipv4,
-        "in_port": siwtch_input_port,
-        "active":"true",
-        "actions": f"output={siwtch_output_port}"
-        }
 
-        second_direction = {
-        "switch": switch_dpid,
-        "name": flow_second_direction_name,
-        "cookie": "0",
-        "priority":"32768",
-        "eth_type" : "0x0800" ,
-        "ipv4_src": dst_host_ipv4,
-        "ipv4_dst": src_host_ipv4,
-        "in_port": siwtch_output_port,
-        "active":"true",
-        "actions": f"output={siwtch_input_port}"
-        }
-        
-        flowPusher(first_direction)
-        flowPusher(second_direction)
+        for ip_proto in (ip_protos or [None]):
+            suffix = "" if ip_proto is None else f"_p{ip_proto}"
+            flow_first_direction_name = f"{name_prefix}_{switch_dpid}_{siwtch_input_port}_1{suffix}"
+            flow_second_direction_name = f"{name_prefix}_{switch_dpid}_{siwtch_output_port}_2{suffix}"
 
-        flows.append(flow_first_direction_name)
-        flows.append(flow_second_direction_name)
+            first_direction = {
+            "switch": switch_dpid,
+            "name": flow_first_direction_name,
+            "cookie": "0",
+            "priority": str(priority),
+            "eth_type" : "0x0800" ,
+            "ipv4_src": src_host_ipv4,
+            "ipv4_dst": dst_host_ipv4,
+            "in_port": siwtch_input_port,
+            "active":"true",
+            "actions": f"output={siwtch_output_port}"
+            }
+
+            second_direction = {
+            "switch": switch_dpid,
+            "name": flow_second_direction_name,
+            "cookie": "0",
+            "priority": str(priority),
+            "eth_type" : "0x0800" ,
+            "ipv4_src": dst_host_ipv4,
+            "ipv4_dst": src_host_ipv4,
+            "in_port": siwtch_output_port,
+            "active":"true",
+            "actions": f"output={siwtch_input_port}"
+            }
+
+            if ip_proto is not None:
+                first_direction["ip_proto"] = str(ip_proto)
+                second_direction["ip_proto"] = str(ip_proto)
+
+            flowPusher(first_direction)
+            flowPusher(second_direction)
+
+            flows.append(flow_first_direction_name)
+            flows.append(flow_second_direction_name)
 
     return flows
+
 def deleteAllFlows():
     url = f"http://127.0.0.1:8080/wm/staticentrypusher/clear/all/json"
     response = requests.get(url)
