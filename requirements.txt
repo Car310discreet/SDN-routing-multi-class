@@ -1,0 +1,12 @@
+# Python 3.11 (nfstream has no wheels for 3.13+)
+mininet @ git+https://github.com/mininet/mininet.git@2.3.1b4
+nfstream==6.6.0
+pingparsing==1.4.2
+requests==2.34.2
+numpy==2.4.6
+pandas==3.0.6
+scikit-learn==1.9.1
+joblib==1.6.0
+xgboost==3.2.0
+matplotlib==3.11.2
+seaborn==0.13.2

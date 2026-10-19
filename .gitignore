@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+
+# experiment run outputs
+output_*.txt
+/sender.log
+/receiver.log
