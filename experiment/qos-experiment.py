@@ -201,6 +201,7 @@ def startNetwork():
 
     # Evaluate Video Quality (PSNR & SSIM)
     info(f'[INFO]****** Evaluating Video Path Quality (PSNR & SSIM) *****\n')
+    psnr_val, ssim_first = None, None
     try:
         psnr_val = calculatePSNR()
         info(f'[INFO]****** PSNR Result: {psnr_val} dB *****\n')
@@ -212,6 +213,10 @@ def startNetwork():
         info(f'[INFO]****** SSIM Result: All={ssim_first} ({ssim_second}) *****\n')
     except Exception as exc:
         info(f'[WARN]****** SSIM Evaluation failed: {exc} *****\n')
+
+    # Persist the video quality next to the ping/throughput outputs (used by the comparison plots)
+    with open(f"output_{routingMetric}_video.json", "w") as videoFile:
+        json.dump({"psnr_db": psnr_val, "ssim": ssim_first}, videoFile)
 
     time_2 = perf_counter()
     print("Time passed: ", time_2 - start)
