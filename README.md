@@ -61,3 +61,16 @@ Each run logs PSNR/SSIM. It writes the 60 s RTT and throughput measurements to
 sudo bash clear_resources/deleteFile.sh records/input.ts
 sudo bash clear_resources/mininet.sh
 ```
+
+## Baseline pipeline
+
+`baseline/` is a modular version of the same evaluation: NSFNET, 5 hop-count candidates, Logistic
+Regression, and a comparison of hop-count, QoS-aware and AIRSDN routing. See
+[baseline/README.md](baseline/README.md).
+
+```bash
+sudo .venv/bin/python baseline/run_experiment.py
+.venv/bin/python baseline/visualize_benchmarks.py results/baseline
+```
+
+The scalable multi-metric extension lives on the `improvements` branch.
