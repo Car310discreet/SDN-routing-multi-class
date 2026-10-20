@@ -11,7 +11,8 @@ Passive, from the controller (Floodlight port counters read twice, `window_s` ap
     path_max_link_util_pct, path_mean_link_util_pct  over both directions of the path's links
 
 Passive features are measured once per decision (before any probe), so probe traffic never shows up
-in them.
+in them. After each iperf3 probe the queues are left to drain for `drain_s` seconds, so a probe does
+not inflate the RTT of the next path.
 """
 from __future__ import annotations
 
@@ -97,10 +98,11 @@ def passive_features(link_util: dict[tuple[str, str], float], path: list[str]) -
 
 class PathTelemetry:
     def __init__(self, net, spec, api: TelemetryClient, ping_count: int = 50, ping_interval: float = 0.05,
-                 ping_deadline_s: float = 5.0, probe_seconds: int = 5, window_s: float = 3.0, port: int = PROBE_PORT):
+                 ping_deadline_s: float = 5.0, probe_seconds: int = 5, window_s: float = 3.0, drain_s: float = 2.0,
+                 port: int = PROBE_PORT):
         self.net, self.spec, self.api = net, spec, api
         self.ping_count, self.ping_interval, self.ping_deadline_s = ping_count, ping_interval, ping_deadline_s
-        self.probe_seconds, self.window_s, self.port = probe_seconds, window_s, port
+        self.probe_seconds, self.window_s, self.drain_s, self.port = probe_seconds, window_s, drain_s, port
 
     def link_utilization(self) -> dict[tuple[str, str], float]:
         first, t0 = self.api.port_tx_bytes(), time.monotonic()
@@ -130,6 +132,9 @@ class PathTelemetry:
         if server.poll() is None:
             server.terminate()
         features.update(parse_iperf(stdout, self.spec.link_bw_mbps))
+        # the probe filled the path's queues (up to 1.2 s each): let them drain so the next path's
+        # ping, which may share links, does not measure this probe
+        time.sleep(self.drain_s)
         features["hop_count"] = len(path) - 1
         features.update(passive_features(link_util, path))
         return {name: float(features[name]) for name in FEATURE_NAMES}
