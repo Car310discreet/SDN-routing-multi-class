@@ -3,7 +3,9 @@
 This extends the AIRSDN baseline (`baseline/`, NSFNET, binary Logistic Regression) in three ways:
 - a larger network: GEANT2, 24 switches and 37 links;
 - four traffic classes instead of two;
-- a comparison of eight classifiers, keeping the best one.
+- a comparison of classifiers, keeping the best one. By default these are the four most likely to do best
+  on this data: XGBoost, Gradient Boosting, Random Forest and SVM. `--models all` adds Logistic
+  Regression, Decision Tree, Bagging and AdaBoost.
 
 The path selection keeps the baseline's structure: 5 hop-count candidates, classify each, take the
 least congested. It runs on the same Mininet + Floodlight stack. The baseline's modules are reused unchanged:
@@ -21,7 +23,8 @@ geant2/
 ├── telemetry.py            path features: ping, iperf3, Floodlight port counters
 ├── collect_dataset.py      network + traffic + telemetry -> data/geant2_dataset.csv   (sudo)
 ├── ml_classifier.py        feature sets, loading and querying the saved model
-├── train_models.py         8 classifiers compared -> models/best_model.joblib, results/training/
+├── train_models.py         top-4 classifiers compared -> models/best_model.joblib, results/training/
+├── run_all.sh              the whole pipeline in one sudo command
 ├── controller_routing.py   Yen top-5 -> classify each -> install the least congested (Floodlight REST)
 ├── run_experiment.py       hop-count vs QoS-aware vs AIRSDN vs GEANT2 ML, with video   (sudo)
 ├── evaluate.py             PSNR, SSIM, RTT, throughput, packet loss: tables, bar and line charts
@@ -78,10 +81,15 @@ git switch GEANT2
 
 ./start_floodlight.sh                                       # separate terminal, keep running
 
-# 1. dataset: 2,000 balanced rows, about 6-7 hours; Ctrl+C and rerun to resume
+# everything below in one command (logs to results/geant2/run_all.log):
+sudo geant2/run_all.sh                                      # full run, about 12-13 hours
+sudo SAMPLES=200 SCENARIOS=1 geant2/run_all.sh              # smoke test, about 1 hour
+
+# or step by step:
+# 1. dataset: 4,000 balanced rows, about 11-12 hours; Ctrl+C and rerun to resume
 sudo .venv/bin/python geant2/collect_dataset.py
 
-# 2. models: compare 8 classifiers, save the best (no sudo)
+# 2. models: compare the top-4 classifiers, save the best (no sudo); --models all for all 8
 .venv/bin/python geant2/train_models.py
 
 # 3. routing + video evaluation, 3 traffic scenarios (about 20 minutes each)

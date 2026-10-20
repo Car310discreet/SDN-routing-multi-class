@@ -79,14 +79,16 @@ The scalable multi-metric extension lives on the `improvements` branch.
 
 `geant2/` scales the pipeline up to the 24-switch GEANT2 network. It adds:
 - four traffic classes (Extremely Low → Extremely High) from a fluctuating per-link traffic generator;
-- a comparison of eight classifiers (LR, Decision Tree, SVM, XGBoost, Random Forest, Bagging, AdaBoost,
-  Gradient Boosting);
+- a comparison of classifiers: by default XGBoost, Gradient Boosting, Random Forest and SVM; `--models all`
+  adds LR, Decision Tree, Bagging and AdaBoost;
 - an evaluation against the baseline approach on the same network.
 
 See [geant2/README.md](geant2/README.md).
 
 ```bash
-sudo .venv/bin/python geant2/collect_dataset.py           # with Floodlight running
+sudo geant2/run_all.sh                                    # whole pipeline, with Floodlight running
+# or step by step:
+sudo .venv/bin/python geant2/collect_dataset.py
 .venv/bin/python geant2/train_models.py
 sudo .venv/bin/python geant2/run_experiment.py --scenarios 3
 .venv/bin/python geant2/evaluate.py results/geant2

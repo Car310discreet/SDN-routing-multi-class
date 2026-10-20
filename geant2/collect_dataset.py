@@ -14,8 +14,9 @@ Each epoch:
 Rows are appended to the CSV as they are measured, so a run can be stopped and resumed. By default,
 paths whose class already has `--samples / 4` rows are not probed, so the dataset ends up balanced.
 
-The default of 2,000 rows (500 per class) is about 180 rows per feature for 11 features. At about
-10 s per probe it takes 6-7 hours; `--probe-seconds 3` shortens it.
+The default of 4,000 rows (1,000 per class) is about 360 rows per feature for 11 features, enough
+for the tree ensembles and the SVM to train and still leave 600 rows for validation and test. At
+about 10 s per probe it takes 11-12 hours.
 
     ./start_floodlight.sh                                     # separate terminal
     sudo .venv/bin/python geant2/collect_dataset.py           # -> geant2/data/geant2_dataset.csv
@@ -148,7 +149,7 @@ def collect(args) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--samples", type=int, default=2000, help="target number of rows")
+    parser.add_argument("--samples", type=int, default=4000, help="target number of rows")
     parser.add_argument("--no-balance", dest="balance", action="store_false",
                         help="keep every probed path instead of capping each class at samples / 4")
     parser.add_argument("--out", default=DEFAULT_OUT)

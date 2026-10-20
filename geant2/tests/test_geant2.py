@@ -107,7 +107,8 @@ def trained(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("training")
     synthetic_dataset(tmp / "data.csv")
     args = type("Args", (), {"data": str(tmp / "data.csv"), "feature_set": "all",
-                             "model_out": str(tmp / "best_model.joblib"), "results": str(tmp / "results")})
+                             "model_out": str(tmp / "best_model.joblib"), "results": str(tmp / "results"),
+                             "models": "top4"})
     best = train_models.train(args)
     return tmp, best
 
@@ -115,8 +116,7 @@ def trained(tmp_path_factory):
 def test_training_compares_all_models_and_saves_the_best(trained):
     tmp, best = trained
     table = pd.read_csv(tmp / "results" / "model_comparison.csv")
-    assert set(table["model"]) == {"Logistic Regression", "Decision Tree", "SVM", "XGBoost", "Random Forest",
-                                   "Bagging", "AdaBoost", "Gradient Boosting"}
+    assert set(table["model"]) == set(train_models.TOP4)
     assert {"accuracy", "precision", "f1"} <= set(table.columns)
     assert (tmp / "results" / "model_comparison.png").exists()
     classifier = CongestionClassifier.load(str(tmp / "best_model.joblib"))
@@ -187,3 +187,9 @@ def test_evaluate_writes_tables_and_figures(tmp_path):
     assert summary.loc["GEANT2 multi-class ML", "psnr_db"] == pytest.approx(37.0)
     for name in ("summary.png", "rtt_throughput.png", "video_quality.png", "summary_table.csv", "per_scenario.csv"):
         assert (tmp_path / "geant2_x" / "figures" / name).exists()
+
+
+def test_all_eight_models_are_available():
+    assert set(train_models.build_models()) == {"Logistic Regression", "Decision Tree", "SVM", "XGBoost",
+                                                "Random Forest", "Bagging", "AdaBoost", "Gradient Boosting"}
+    assert list(train_models.build_models(train_models.TOP4)) == train_models.TOP4

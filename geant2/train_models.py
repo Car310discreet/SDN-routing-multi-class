@@ -2,10 +2,13 @@
 train_models.py - train and compare the 4-class traffic classifiers on the GEANT2 dataset.
 
 Classes: 0 Extremely Low, 1 Low, 2 High, 3 Extremely High. Split 70 % train / 15 % validation /
-15 % test (stratified, as in the baseline). Models:
-    Logistic Regression, Decision Tree, SVM (RBF), XGBoost,
-    bagging: Random Forest, Bagging (decision trees)
-    boosting: AdaBoost, Gradient Boosting
+15 % test (stratified, as in the baseline).
+
+By default the four models most likely to do best on this data are trained (`--models top4`):
+    XGBoost, Gradient Boosting (boosting), Random Forest (bagging), SVM (RBF kernel)
+The class boundaries are non-linear (RTT and loss jump once a link saturates), which favours tree
+ensembles and kernel methods. `--models all` adds Logistic Regression, Decision Tree, Bagging and
+AdaBoost.
 The best model is the one with the highest validation macro-F1 (the test set is only reported). It
 is saved with its feature list to geant2/models/best_model.joblib for controller_routing.py.
 
@@ -16,6 +19,7 @@ Outputs in geant2/results/training/:
 
     .venv/bin/python geant2/train_models.py                        # all features
     .venv/bin/python geant2/train_models.py --feature-set active   # end-to-end features only
+    .venv/bin/python geant2/train_models.py --models all           # all 8 classifiers
 """
 from __future__ import annotations
 
@@ -48,12 +52,13 @@ GEANT2_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA = os.path.join(GEANT2_DIR, "data", "geant2_dataset.csv")
 DEFAULT_RESULTS = os.path.join(GEANT2_DIR, "results", "training")
 SEED = 40
+TOP4 = ["XGBoost", "Random Forest", "Gradient Boosting", "SVM"]
 
 
-def build_models() -> dict:
+def build_models(names: list[str] | None = None) -> dict:
     # Distance / margin based models need scaled features (RTT in ms vs utilisation in %)
     scaled = lambda model: make_pipeline(StandardScaler(), model)  # noqa: E731
-    return {
+    models = {
         "Logistic Regression": scaled(LogisticRegression(max_iter=2000, class_weight="balanced", random_state=SEED)),
         "Decision Tree": DecisionTreeClassifier(class_weight="balanced", random_state=SEED),
         "SVM": scaled(SVC(kernel="rbf", probability=True, class_weight="balanced", random_state=SEED)),
@@ -64,6 +69,7 @@ def build_models() -> dict:
         "AdaBoost": AdaBoostClassifier(n_estimators=200, random_state=SEED),
         "Gradient Boosting": GradientBoostingClassifier(random_state=SEED),
     }
+    return models if names is None else {name: models[name] for name in names}
 
 
 def scores(y_true, y_pred) -> dict:
@@ -124,7 +130,8 @@ def train(args) -> str:
              args.feature_set, len(y_train), len(y_val), len(y_test))
 
     rows, fitted = [], {}
-    for name, model in build_models().items():
+    names = None if args.models == "all" else TOP4
+    for name, model in build_models(names).items():
         start = time.perf_counter()
         if name == "XGBoost":
             model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
@@ -172,6 +179,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data", default=DEFAULT_DATA)
     parser.add_argument("--feature-set", choices=sorted(FEATURE_SETS), default="all")
+    parser.add_argument("--models", choices=["top4", "all"], default="top4")
     parser.add_argument("--model-out", default=DEFAULT_MODEL)
     parser.add_argument("--results", default=DEFAULT_RESULTS)
     args = parser.parse_args()
