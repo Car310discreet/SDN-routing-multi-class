@@ -2,7 +2,7 @@
 telemetry.py - path features for the GEANT2 multi-class traffic classifier.
 
 Active, end to end, on a path whose ICMP/TCP traffic is pinned by static entries:
-    ping -c 50 -i 0.05 src -> dst        rtt_avg_ms, rtt_min_ms, rtt_max_ms, rtt_mdev_ms (jitter),
+    ping -c 50 -i 0.05 -W 5 src -> dst   rtt_avg_ms, rtt_min_ms, rtt_max_ms, rtt_mdev_ms (jitter),
                                          packet_loss_pct
     iperf3 TCP src -> dst, 5 s           throughput_mbps, retransmits,
                                          bw_utilization_pct = 100 * (1 - throughput / link capacity)
@@ -97,7 +97,7 @@ def passive_features(link_util: dict[tuple[str, str], float], path: list[str]) -
 
 class PathTelemetry:
     def __init__(self, net, spec, api: TelemetryClient, ping_count: int = 50, ping_interval: float = 0.05,
-                 ping_deadline_s: float = 15.0, probe_seconds: int = 5, window_s: float = 3.0, port: int = PROBE_PORT):
+                 ping_deadline_s: float = 5.0, probe_seconds: int = 5, window_s: float = 3.0, port: int = PROBE_PORT):
         self.net, self.spec, self.api = net, spec, api
         self.ping_count, self.ping_interval, self.ping_deadline_s = ping_count, ping_interval, ping_deadline_s
         self.probe_seconds, self.window_s, self.port = probe_seconds, window_s, port
@@ -112,8 +112,10 @@ class PathTelemetry:
         """The FEATURE_NAMES of `path` (ICMP/TCP between the hosts must already be pinned onto it)."""
         src, dst = self.net.get(src_host), self.net.get(dst_host)
         dst_ip = self.spec.hosts[dst_host].ip
+        # exactly ping_count requests, then wait up to ping_deadline_s for late replies. (-w would keep
+        # sending until ping_count replies arrive and count the requests still in flight as lost.)
         features = parse_ping(src.cmd(f"ping -q -c {self.ping_count} -i {self.ping_interval} "
-                                      f"-w {self.ping_deadline_s:g} {dst_ip}"), self.ping_deadline_s)
+                                      f"-W {self.ping_deadline_s:g} {dst_ip}"), self.ping_deadline_s)
 
         server = dst.popen(["iperf3", "-s", "-1", "-p", str(self.port)],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

@@ -3,7 +3,9 @@ collect_dataset.py - build the 4-class GEANT2 path dataset (needs root and a run
 
 Each epoch:
   1. the traffic generator draws and applies a new scenario (per-link offered loads), then waits
-     `--warmup` seconds;
+     `--warmup` seconds. With probability `--targeted` (default 0.7) the scenario targets the class
+     that is furthest behind its quota (see traffic_gen.targeted_weights), so all four classes fill at
+     a similar pace; otherwise it is an untargeted scenario;
   2. the passive link utilisation is read from Floodlight once;
   3. paths are probed one at a time (their ICMP/TCP pinned with static entries): the 5 hop-count
      candidates Sender -> Receiver, plus one random candidate of `--extra-pairs` random host pairs
@@ -108,7 +110,10 @@ def collect(args) -> str:
                 writer.writeheader()
             epoch = first_epoch
             while not done() and (args.max_epochs is None or epoch < first_epoch + args.max_epochs):
-                scenario = sample_scenario(spec.graph, rng.randrange(2 ** 31), args.path_hops)
+                target = None
+                if args.balance and rng.random() < args.targeted:
+                    target = min(range(len(CLASS_NAMES)), key=lambda c: (counts[c] / quota, c))
+                scenario = sample_scenario(spec.graph, rng.randrange(2 ** 31), args.path_hops, target)
                 generator.apply(scenario)
                 time.sleep(args.warmup)
                 link_util = telemetry.link_utilization()
@@ -157,6 +162,8 @@ def main():
     parser.add_argument("--probe-seconds", type=int, default=5, help="iperf3 probe length")
     parser.add_argument("--warmup", type=float, default=5.0, help="seconds after a new scenario before measuring")
     parser.add_argument("--path-hops", type=float, default=6.0, help="path length the class balance targets")
+    parser.add_argument("--targeted", type=float, default=0.7,
+                        help="share of epochs whose scenario targets the class furthest behind its quota")
     parser.add_argument("--max-epochs", type=int)
     parser.add_argument("--hosts-per-switch", type=int, default=1)
     parser.add_argument("--seed", type=int, default=0)

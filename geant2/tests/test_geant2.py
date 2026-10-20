@@ -193,3 +193,14 @@ def test_all_eight_models_are_available():
     assert set(train_models.build_models()) == {"Logistic Regression", "Decision Tree", "SVM", "XGBoost",
                                                 "Random Forest", "Bagging", "AdaBoost", "Gradient Boosting"}
     assert list(train_models.build_models(train_models.TOP4)) == train_models.TOP4
+
+
+def test_targeted_scenarios_hit_the_target_class():
+    from traffic_gen import targeted_weights
+    candidates = candidate_paths(SPEC)
+    for target in range(4):
+        weights = targeted_weights(target, 6)
+        assert np.isclose(weights.sum(), 1.0) and not weights[target + 1:].any()
+        hits = sum(sample_scenario(SPEC.graph, s, 6, target).path_class(p) == target
+                   for s in range(100) for p in candidates)
+        assert hits / (100 * len(candidates)) > 0.75

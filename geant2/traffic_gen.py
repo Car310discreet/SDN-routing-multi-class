@@ -16,6 +16,10 @@ is drawn, so link utilisation fluctuates over time. A path's class is the class 
 "Extremely High", so link classes are drawn with weights that make path classes balanced for paths
 of `path_hops` links: P(link class <= c) = ((c + 1) / 4) ** (1 / path_hops).
 
+A targeted scenario (`target_class=c`) draws link classes only up to c, with class c on a
+`target_share` of the links, so most multi-hop paths have a class-c bottleneck. The dataset collector
+uses it to fill the classes that lag behind. Labels are still the true bottleneck class of each path.
+
 Offline preview of the class balance (no root):
     python geant2/traffic_gen.py --preview
 Fluctuating traffic on a live network (root, Floodlight running), new scenario every 60 s:
@@ -87,9 +91,21 @@ class Scenario:
         return {"seed": self.seed, "utilization": {f"{u}-{v}": round(x, 4) for (u, v), x in self.utilization.items()}}
 
 
-def sample_scenario(graph, seed: int | None = None, path_hops: float = 6.0) -> Scenario:
-    rng = np.random.default_rng(seed)
+def targeted_weights(target_class: int, path_hops: float, target_share: float = 0.3) -> np.ndarray:
+    """Link-class weights with no class above `target_class` and `target_share` of links in it."""
     weights = link_class_weights(path_hops)
+    weights[target_class + 1:] = 0.0
+    if target_class == 0:
+        return weights / weights.sum()
+    lower = weights[:target_class] / weights[:target_class].sum() * (1.0 - target_share)
+    weights[:target_class], weights[target_class] = lower, target_share
+    return weights
+
+
+def sample_scenario(graph, seed: int | None = None, path_hops: float = 6.0,
+                    target_class: int | None = None) -> Scenario:
+    rng = np.random.default_rng(seed)
+    weights = link_class_weights(path_hops) if target_class is None else targeted_weights(target_class, path_hops)
     utilization = {}
     for u, v in sorted(link_key(a, b) for a, b in graph.edges):
         low, high = CLASS_BANDS[rng.choice(len(CLASS_BANDS), p=weights)]
