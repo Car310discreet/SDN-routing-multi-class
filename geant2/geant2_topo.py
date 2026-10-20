@@ -132,9 +132,17 @@ def start_without_ipv6(spec: TopologySpec):
     return net
 
 
-def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0):
-    """Start GEANT2 on Floodlight, wait for every switch, clear old static entries, check connectivity
-    (needs root)."""
+def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0,
+                 max_loss_pct: float = 1.0):
+    """
+    Start GEANT2 on Floodlight, wait for every switch, clear old static entries and check connectivity
+    (needs root).
+
+    pingAll sends one ping per host pair with a 1 s timeout, so a few pairs can time out while
+    Floodlight sets up reactive flows. Up to `max_loss_pct` of isolated misses is accepted. A broken
+    controller loses whole hosts: 46 of the 552 pairs per unreachable host, more than 8 %. The
+    Sender <-> Receiver pair must always answer.
+    """
     from telemetry_and_model import ControllerError, wait_for_switches
     net = start_without_ipv6(spec)
     try:
@@ -143,13 +151,19 @@ def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float
         api.set_routing_metric("hopcount")
         if ping_all:
             log.info("Testing connectivity (pingAll) so Floodlight learns every host")
-            loss = net.pingAll()
-            if loss > 0:
-                log.warning("pingAll lost %.1f %%; waiting %.0f s for the topology to settle", loss, settle_s)
-                time.sleep(settle_s)
+            endpoints = [net.get(SENDER), net.get(RECEIVER)]
+            for attempt in range(2):
                 loss = net.pingAll()
-            if loss > 0:
-                raise ControllerError(f"Hosts cannot reach each other through Floodlight ({loss:.1f} % ping loss)")
+                pair_loss = net.ping(endpoints, timeout="2")
+                if loss <= max_loss_pct and pair_loss == 0:
+                    break
+                if attempt == 0:
+                    log.warning("pingAll lost %.1f %% (Sender <-> Receiver %.0f %%); waiting %.0f s for the "
+                                "topology to settle", loss, pair_loss, settle_s)
+                    time.sleep(settle_s)
+            else:
+                raise ControllerError(f"Hosts cannot reach each other through Floodlight ({loss:.1f} % ping loss, "
+                                      f"Sender <-> Receiver {pair_loss:.0f} %)")
     except BaseException:
         stop_network(net)
         raise
