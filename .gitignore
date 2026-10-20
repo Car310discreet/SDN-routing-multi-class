@@ -11,3 +11,4 @@ output_*_video.json
 results/baseline/
 results/extension/
 results/geant2/
+results/geant2_smoke/
