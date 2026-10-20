@@ -13,7 +13,8 @@ Approaches, each run under the same background-traffic scenario:
 For every scenario (`--scenarios N`, seeds `--seed`, `--seed + 1`, ...) the traffic generator applies one
 fixed set of link loads. Each approach then chooses a route, and on that route (multimedia_evaluator.py):
   60 s RTT + ping packet loss, 60 s throughput (iperf3), and the 66 s H.264 video streamed
-  Sender -> Receiver with FFmpeg, scored with PSNR and SSIM.
+  Sender -> Receiver with FFmpeg, scored with PSNR and SSIM (video_quality.py: native H.264 decoder,
+  so badly damaged video is scored too).
 
 Results: results/geant2/geant2_<timestamp>/scenario_<k>/<approach>/
     decision.json (candidates, ground-truth class of each, predictions, chosen path),
@@ -38,12 +39,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from controller_routing import candidate_paths, floodlight_paths, ml_routing  # noqa: E402
 from geant2_topo import RECEIVER, SENDER, build_geant2, chown_to_invoking_user, start_geant2  # noqa: E402
 from ml_classifier import DEFAULT_MODEL, CongestionClassifier  # noqa: E402
-from multimedia_evaluator import DEFAULT_VIDEO, Evaluator  # noqa: E402
+from multimedia_evaluator import DEFAULT_VIDEO  # noqa: E402
 from telemetry import PathTelemetry, TelemetryClient  # noqa: E402
 from telemetry_and_model import (ControllerError, FlowInstaller, PathProber, TrafficClassifier,  # noqa: E402
                                  routing_algorithm)
 from topology_builder import stop_network  # noqa: E402
 from traffic_gen import CLASS_NAMES, TrafficGenerator, sample_scenario  # noqa: E402
+from video_quality import Evaluator  # noqa: E402  (scores damaged video too)
 
 log = logging.getLogger("run_experiment")
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
