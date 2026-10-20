@@ -10,3 +10,4 @@ output_*_video.json
 # raw run data (videos, logs)
 results/baseline/
 results/extension/
+results/geant2/

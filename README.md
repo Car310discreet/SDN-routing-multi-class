@@ -74,3 +74,20 @@ sudo .venv/bin/python baseline/run_experiment.py
 ```
 
 The scalable multi-metric extension lives on the `improvements` branch.
+
+## GEANT2 multi-class extension
+
+`geant2/` scales the pipeline up to the 24-switch GEANT2 network. It adds:
+- four traffic classes (Extremely Low → Extremely High) from a fluctuating per-link traffic generator;
+- a comparison of eight classifiers (LR, Decision Tree, SVM, XGBoost, Random Forest, Bagging, AdaBoost,
+  Gradient Boosting);
+- an evaluation against the baseline approach on the same network.
+
+See [geant2/README.md](geant2/README.md).
+
+```bash
+sudo .venv/bin/python geant2/collect_dataset.py           # with Floodlight running
+.venv/bin/python geant2/train_models.py
+sudo .venv/bin/python geant2/run_experiment.py --scenarios 3
+.venv/bin/python geant2/evaluate.py results/geant2
+```
