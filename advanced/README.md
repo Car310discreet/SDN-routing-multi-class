@@ -1,5 +1,8 @@
 # GEANT2 multi-metric + multi-class routing (combined architecture)
 
+The full technical report is in [REPORT.md](REPORT.md); a PDF copy is at
+[report/Advanced_Technical_Report.pdf](report/Advanced_Technical_Report.pdf).
+
 Branch `geant2-multi-metric-advanced`. It combines two earlier branches:
 
 - **GEANT2:** the topology, 4-class background traffic, the multi-class ensemble and its 500-row dataset.
@@ -34,7 +37,7 @@ Stage 1   │ path_discovery.py   top-K (5-10) paths, togglable:  │   ~1-6 ms
           └──────────────────────────┬──────────────────────────┘
                                      │ K candidates, each with its composite cost
           ┌──────────────────────────▼──────────────────────────┐
-Stage 2   │ telemetry_and_model.py                              │   probe ~10 s / candidate
+Stage 2   │ telemetry_and_model.py                              │   probe 13–40 s / candidate
           │   probe each candidate (ping + iperf3, 11 features) │   inference ~28 ms / decision
           │   ensemble (XGBoost, RF, GB, SVM) → class 0..3      │
           │   choose lowest class; tie → lowest composite cost  │
@@ -154,8 +157,9 @@ Offline decision cost on GEANT2, mean of 20 trials:
 | Stage 2 inference (batched) | 28.8 ms | 28.1 ms |
 
 Stage 2 runs a single `predict_proba` call over all K candidates, so its cost does not grow with K. In a
-live decision the dominant cost is measurement: about 12 s of link telemetry plus about 10 s of probing (ping, iperf3, queue drain) per
-candidate. Computation is small next to that.
+live decision the dominant cost is measurement: about 19 s of link telemetry, plus 13–20 s of probing (ping,
+iperf3, queue drain) per lightly loaded candidate and up to about 40 s per saturated one. Computation is
+small next to that.
 
 ### Live benchmark (Mininet + Floodlight, 3 scenarios, `--congest-default-path`)
 
