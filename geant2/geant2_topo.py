@@ -109,7 +109,7 @@ IPV6_DEFAULT = "/proc/sys/net/ipv6/conf/default/disable_ipv6"
 
 def start_without_ipv6(spec: TopologySpec):
     """
-    start_network() with IPv6 off on every switch and host interface.
+    start_network() with IPv6 off on every switch and host interface, and static ARP entries.
 
     With IPv6 on, the link-local traffic of the switch ports (in the root namespace) reaches Open vSwitch
     with a packet mark. Open vSwitch then reports a pkt_mark field in PacketIn messages, which
@@ -129,6 +129,9 @@ def start_without_ipv6(spec: TopologySpec):
             handle.write(previous)
     for host in net.hosts:
         host.cmd("sysctl -qw net.ipv6.conf.all.disable_ipv6=1")
+    # Static ARP: static entries pin only IPv4 onto a path, so ARP would otherwise follow Floodlight's
+    # own route, and on an overloaded link a lost ARP exchange looks like 100 % ping loss on the probed path
+    net.staticArp()
     return net
 
 
