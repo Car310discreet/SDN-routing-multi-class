@@ -9,6 +9,8 @@ Reads results/geant2/<run>/scenario_<k>/<approach>/{summary.json,timeseries.csv,
     video_quality.png    line plots: per-frame PSNR and SSIM (mean over scenarios, 60-frame rolling mean,
                          about 1 s of the ~61 fps test video)
     summary_table.csv    per approach: mean metrics and the ground-truth class of the chosen paths
+                         (a path too congested for iperf3 to report counts as 0 Mbps; per_scenario.csv
+                         marks it with throughput_measured = False)
     per_scenario.csv     every scenario x approach
 
 The baseline paper's approach is "airsdn" (binary Logistic Regression on the same 5 candidates);
@@ -94,6 +96,12 @@ def tables(data: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
                          "chosen_path": "-".join(decision.get("chosen_path") or []),
                          "chosen_true_class": truth.get("class"), "chosen_true_class_name": truth.get("class_name")})
     per_scenario = pd.DataFrame(rows)
+    # iperf3 gives no result when a path is too congested to hold its connection (RTT in seconds, most
+    # packets lost). That path delivered nothing: count it as 0 Mbps rather than leave it out of the mean,
+    # which would flatter the approach that chose it.
+    throughput = pd.to_numeric(per_scenario["mean_throughput_mbps"], errors="coerce")
+    per_scenario["throughput_measured"] = throughput.notna()
+    per_scenario["mean_throughput_mbps"] = throughput.fillna(0.0)
     numeric = [key for key, _, _ in METRICS] + ["frames_received", "chosen_true_class"]
     summary = per_scenario.groupby("approach")[numeric].agg(lambda s: pd.to_numeric(s, errors="coerce").mean())
     summary.insert(0, "scenarios", per_scenario.groupby("approach").size())
