@@ -24,6 +24,7 @@ Gradient Boosting, XGBoost, Random Forest and Bagging all reach **97.3 % accurac
 Gradient Boosting is deployed in the controller.
 
 Four routing approaches were compared over three seeded traffic scenarios:
+
 - Floodlight hop-count routing;
 - Floodlight QoS-aware (latency) routing;
 - the original AIRSDN;
@@ -76,6 +77,7 @@ classified it with a binary model. Two limits of that design motivate this work:
 ## 2. System Architecture
 
 The system has four layers:
+
 - the emulated data plane (Mininet with Open vSwitch);
 - the controller (Floodlight, through its REST API);
 - a measurement and learning layer;
@@ -168,6 +170,7 @@ entries, and 11 features are measured:
 | Controller | `path_max_link_util_pct`, `path_mean_link_util_pct` | Floodlight port counters read twice, 3 s apart, before any probe |
 
 Two corrections were needed to make these measurements sound:
+
 1. **Ping counting.** Ping is run with a fixed request count and a reply timeout (`-c 50 -W 5`). The
    alternative, a deadline (`-w`), keeps sending until 50 replies arrive. It then counts the 1–2 requests
    still in flight as lost, which produced a spurious 2–4 % loss on every path.
@@ -265,6 +268,7 @@ it also has the best test performance among the tied models: 0.974 test F1, agai
 Decision Tree. Its inference cost (0.013 ms per path) is negligible next to the seconds of probing.
 
 **Families.**
+
 - Tree ensembles of both kinds, bagging and boosting, form a clear top tier.
 - The linear and kernel models trail by about 4 points. Linear class boundaries struggle with the sharp
   non-linear transition into saturation (Section 2.4).
@@ -283,6 +287,7 @@ Decision Tree. Its inference cost (0.013 ms per path) is negligible next to the 
 | **Extremely High** | 1 | 0 | 0 | 17 |
 
 **The two errors.** Both are explained by the data, not by the model:
+
 - The *Extremely High* row predicted *Extremely Low* is one of the 0.6 % mislabelled rows. Its background
   flow did not run, so the path measured idle: base RTT, 0 % loss, 7.4 Mbps, 22 % utilisation. The
   prediction matches what the network was actually doing.
@@ -323,6 +328,7 @@ so every approach faces identical conditions.
 | **Proposed** | 5 hop-count candidates, 11 features, 4-class Gradient Boosting, lowest predicted class |
 
 **Measurements on the selected route.** These follow the baseline protocol:
+
 - RTT and packet loss from 60 pings at 1 s intervals;
 - throughput from a 60 s iperf3 TCP transfer (Sender → Receiver);
 - **multimedia quality** from a 66 s H.264 test sequence (`surreal.ts`: 1920 × 1048, about 61 fps, 4,007
@@ -405,6 +411,7 @@ Per scenario:
 ### 4.4 Discussion by metric
 
 **PSNR and SSIM.** Video quality is binary in practice.
+
 - On any uncongested path the stream arrives intact. Every such transfer scores 38.43 dB / 0.998, with
   3,968 of 4,007 frames decoded. That is the measurement ceiling: the first 39 frames are not decodable at
   the receiver in any run, whatever the approach.
@@ -419,6 +426,7 @@ Per scenario:
   class**, and both learned approaches achieve it.
 
 **Throughput.**
+
 - The proposed method has the highest mean throughput, 7.17 Mbps. That is 7.1 % above AIRSDN, 54 % above
   hop-count and 125 % above QoS-aware.
 - It is the highest or joint-highest in every scenario.
@@ -429,6 +437,7 @@ Per scenario:
 - This headroom is margin for traffic growth, which a binary classifier cannot see.
 
 **Latency (RTT).**
+
 - The proposed method's mean RTT is 133 ms against AIRSDN's 120 ms. The 20 ms increase in two scenarios
   is purely propagation delay: the least-loaded path was one hop longer, at 10 ms per direction.
 - No queueing delay was added: per-second RTT had a standard deviation of at most 1.2 ms. This is a
@@ -439,11 +448,13 @@ Per scenario:
   of the same class.
 
 **Packet loss.**
+
 - Both learned approaches deliver 0 % ping loss in every scenario.
 - Hop-count averages 22.2 % (66.7 % in scenario 1) and QoS-aware 20.0 % (60.0 % in scenario 1). The
   corresponding frame losses in the decoded video are 27 % and 8 % respectively, averaged over scenarios.
 
 **Decision overhead.**
+
 - The proposed pipeline probes for 5 s per path, so a decision takes 62–126 s.
 - AIRSDN's 30 s iperf3 probe and NFStream capture take 220–310 s per decision.
 - The proposed pipeline is therefore 2.5–3.6× faster, a meaningful advantage for re-routing as load
