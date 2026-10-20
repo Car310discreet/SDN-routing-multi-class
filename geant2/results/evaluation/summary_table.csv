@@ -1,0 +1,5 @@
+approach,scenarios,psnr_db,ssim,mean_rtt_ms,mean_throughput_mbps,ping_loss_pct,frames_received,chosen_true_class
+Hop-count,3,30.5486,0.9127,830.1947,4.6543,22.2222,2906.6667,1.3333
+QoS-aware,3,24.8179,0.8577,514.1277,3.1747,20.0,3667.3333,1.0
+AIRSDN (baseline),3,38.428,0.9976,120.0667,6.693,0.0,3968.0,0.6667
+GEANT2 multi-class ML,3,38.428,0.9976,133.3333,7.1653,0.0,3968.0,0.0

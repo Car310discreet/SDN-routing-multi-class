@@ -1,0 +1,13 @@
+scenario,approach,psnr_db,ssim,mean_rtt_ms,mean_throughput_mbps,ping_loss_pct,frames_received,chosen_path,chosen_true_class,chosen_true_class_name,throughput_measured
+0,hop_count,38.427384,0.997637,120.167,6.798,0.0,3967,s15-s14-s11-s8-s12-s19-s23,1,Low,True
+1,hop_count,14.790335,0.742833,2250.25,0.0,66.6667,785,s15-s14-s11-s8-s12-s19-s23,3,Extremely High,False
+2,hop_count,38.427988,0.997639,120.167,7.165,0.0,3968,s15-s14-s11-s8-s12-s19-s23,0,Extremely Low,True
+0,qos_aware,16.834818,0.780265,120.15,2.709,0.0,3096,s15-s16-s17-s18-s21-s22-s23,2,High,True
+1,qos_aware,19.19075,0.795097,1302.083,0.0,60.0,3938,s15-s16-s17-s8-s12-s19-s23,1,Low,False
+2,qos_aware,38.427988,0.997639,120.15,6.815,0.0,3968,s15-s16-s17-s18-s21-s22-s23,0,Extremely Low,True
+0,airsdn,38.427988,0.997639,120.05,6.64,0.0,3968,s15-s14-s11-s8-s12-s19-s23,1,Low,True
+1,airsdn,38.427988,0.997639,120.067,6.274,0.0,3968,s15-s16-s17-s8-s12-s19-s23,1,Low,True
+2,airsdn,38.427988,0.997639,120.083,7.165,0.0,3968,s15-s14-s11-s8-s12-s19-s23,0,Extremely Low,True
+0,geant2_ml,38.427988,0.997639,139.867,7.13,0.0,3968,s15-s14-s11-s8-s18-s21-s22-s23,0,Extremely Low,True
+1,geant2_ml,38.427988,0.997639,140.083,7.201,0.0,3968,s15-s14-s11-s7-s8-s12-s19-s23,0,Extremely Low,True
+2,geant2_ml,38.427988,0.997639,120.05,7.165,0.0,3968,s15-s14-s11-s8-s12-s19-s23,0,Extremely Low,True

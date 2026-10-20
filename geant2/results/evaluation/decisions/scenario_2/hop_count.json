@@ -1,0 +1,107 @@
+{
+  "approach": "hop_count",
+  "floodlight_metric": "hopcount",
+  "candidates": [
+    {
+      "index": 0,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2474,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 1,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.8009,
+        "class": 3,
+        "class_name": "Extremely High"
+      }
+    },
+    {
+      "index": 2,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2317,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 3,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s7",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2474,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 4,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.4887,
+        "class": 1,
+        "class_name": "Low"
+      }
+    }
+  ],
+  "chosen_path": [
+    "s15",
+    "s14",
+    "s11",
+    "s8",
+    "s12",
+    "s19",
+    "s23"
+  ],
+  "chosen_ground_truth": {
+    "bottleneck_load": 0.2474,
+    "class": 0,
+    "class_name": "Extremely Low"
+  }
+}

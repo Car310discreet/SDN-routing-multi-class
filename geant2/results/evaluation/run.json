@@ -1,0 +1,374 @@
+{
+  "topology": "geant2",
+  "sender": "h15",
+  "receiver": "h23",
+  "candidates": [
+    [
+      "s15",
+      "s14",
+      "s11",
+      "s8",
+      "s12",
+      "s19",
+      "s23"
+    ],
+    [
+      "s15",
+      "s16",
+      "s17",
+      "s8",
+      "s12",
+      "s19",
+      "s23"
+    ],
+    [
+      "s15",
+      "s16",
+      "s17",
+      "s18",
+      "s21",
+      "s22",
+      "s23"
+    ],
+    [
+      "s15",
+      "s14",
+      "s11",
+      "s7",
+      "s8",
+      "s12",
+      "s19",
+      "s23"
+    ],
+    [
+      "s15",
+      "s14",
+      "s11",
+      "s8",
+      "s18",
+      "s21",
+      "s22",
+      "s23"
+    ]
+  ],
+  "geant2_model": "Gradient Boosting",
+  "scenarios": {
+    "0": {
+      "seed": 1000,
+      "approaches": {
+        "hop_count": {
+          "summary": {
+            "approach": "hop_count",
+            "mean_rtt_ms": 120.167,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 6.798,
+            "psnr_db": 38.427384,
+            "ssim": 0.997637,
+            "frames_received": 3967
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2871,
+            "class": 1,
+            "class_name": "Low"
+          }
+        },
+        "qos_aware": {
+          "summary": {
+            "approach": "qos_aware",
+            "mean_rtt_ms": 120.15,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 2.709,
+            "psnr_db": 16.834818,
+            "ssim": 0.780265,
+            "frames_received": 3096
+          },
+          "chosen_path": [
+            "s15",
+            "s16",
+            "s17",
+            "s18",
+            "s21",
+            "s22",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.7108,
+            "class": 2,
+            "class_name": "High"
+          }
+        },
+        "airsdn": {
+          "summary": {
+            "approach": "airsdn",
+            "mean_rtt_ms": 120.05,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 6.64,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2871,
+            "class": 1,
+            "class_name": "Low"
+          }
+        },
+        "geant2_ml": {
+          "summary": {
+            "approach": "geant2_ml",
+            "mean_rtt_ms": 139.867,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 7.13,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s18",
+            "s21",
+            "s22",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.246,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        }
+      }
+    },
+    "1": {
+      "seed": 1001,
+      "approaches": {
+        "hop_count": {
+          "summary": {
+            "approach": "hop_count",
+            "mean_rtt_ms": 2250.25,
+            "ping_loss_pct": 66.6667,
+            "mean_throughput_mbps": null,
+            "psnr_db": 14.790335,
+            "ssim": 0.742833,
+            "frames_received": 785
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 1.0979,
+            "class": 3,
+            "class_name": "Extremely High"
+          }
+        },
+        "qos_aware": {
+          "summary": {
+            "approach": "qos_aware",
+            "mean_rtt_ms": 1302.083,
+            "ping_loss_pct": 60.0,
+            "mean_throughput_mbps": null,
+            "psnr_db": 19.19075,
+            "ssim": 0.795097,
+            "frames_received": 3938
+          },
+          "chosen_path": [
+            "s15",
+            "s16",
+            "s17",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.345,
+            "class": 1,
+            "class_name": "Low"
+          }
+        },
+        "airsdn": {
+          "summary": {
+            "approach": "airsdn",
+            "mean_rtt_ms": 120.067,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 6.274,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s16",
+            "s17",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.345,
+            "class": 1,
+            "class_name": "Low"
+          }
+        },
+        "geant2_ml": {
+          "summary": {
+            "approach": "geant2_ml",
+            "mean_rtt_ms": 140.083,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 7.201,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s7",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.1626,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        }
+      }
+    },
+    "2": {
+      "seed": 1002,
+      "approaches": {
+        "hop_count": {
+          "summary": {
+            "approach": "hop_count",
+            "mean_rtt_ms": 120.167,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 7.165,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2474,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        },
+        "qos_aware": {
+          "summary": {
+            "approach": "qos_aware",
+            "mean_rtt_ms": 120.15,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 6.815,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s16",
+            "s17",
+            "s18",
+            "s21",
+            "s22",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2317,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        },
+        "airsdn": {
+          "summary": {
+            "approach": "airsdn",
+            "mean_rtt_ms": 120.083,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 7.165,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2474,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        },
+        "geant2_ml": {
+          "summary": {
+            "approach": "geant2_ml",
+            "mean_rtt_ms": 120.05,
+            "ping_loss_pct": 0.0,
+            "mean_throughput_mbps": 7.165,
+            "psnr_db": 38.427988,
+            "ssim": 0.997639,
+            "frames_received": 3968
+          },
+          "chosen_path": [
+            "s15",
+            "s14",
+            "s11",
+            "s8",
+            "s12",
+            "s19",
+            "s23"
+          ],
+          "chosen_ground_truth": {
+            "bottleneck_load": 0.2474,
+            "class": 0,
+            "class_name": "Extremely Low"
+          }
+        }
+      }
+    }
+  }
+}

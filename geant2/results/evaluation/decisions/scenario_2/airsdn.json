@@ -1,0 +1,308 @@
+{
+  "approach": "airsdn",
+  "floodlight_metric": "hopcount",
+  "candidates": [
+    {
+      "index": 0,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2474,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 1,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.8009,
+        "class": 3,
+        "class_name": "Extremely High"
+      }
+    },
+    {
+      "index": 2,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2317,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 3,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s7",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2474,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    },
+    {
+      "index": 4,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.4887,
+        "class": 1,
+        "class_name": "Low"
+      }
+    }
+  ],
+  "stage2": {
+    "chosen_index": 0,
+    "chosen": [
+      "s23",
+      "s19",
+      "s12",
+      "s8",
+      "s11",
+      "s14",
+      "s15"
+    ],
+    "scored": [
+      {
+        "index": 0,
+        "switches": [
+          "s23",
+          "s19",
+          "s12",
+          "s8",
+          "s11",
+          "s14",
+          "s15"
+        ],
+        "features": {
+          "average_rtt": 120.172,
+          "packet_loss": 0.0,
+          "bits_per_second": 7129164.72698012,
+          "bu_ratio": 28.70835273019881,
+          "retransmits": 676,
+          "cpu_host_total": 0.17041792194967417,
+          "cpu_host_system": 0.14570232110488937,
+          "bidirectional_duration_ms": 614.0,
+          "src2dst_duration_ms": 614.0,
+          "dst2src_duration_ms": 483.0,
+          "bidirectional_mean_piat_ms": 40.93333333333333,
+          "bidirectional_stddev_piat_ms": 67.03460371508207,
+          "bidirectional_max_piat_ms": 201.0,
+          "src2dst_mean_piat_ms": 76.75,
+          "src2dst_stddev_piat_ms": 85.15490087397873,
+          "src2dst_max_piat_ms": 201.0,
+          "dst2src_mean_piat_ms": 80.5,
+          "dst2src_stddev_piat_ms": 98.71524704927806,
+          "dst2src_max_piat_ms": 242.0
+        },
+        "traffic_level": 1,
+        "p_high_traffic": 0.014451,
+        "probe_s": 45.3,
+        "inference_ms": 1.6264
+      },
+      {
+        "index": 1,
+        "switches": [
+          "s23",
+          "s19",
+          "s12",
+          "s8",
+          "s17",
+          "s16",
+          "s15"
+        ],
+        "features": {
+          "average_rtt": 120.412,
+          "packet_loss": 0.0,
+          "bits_per_second": 2026910.3986434785,
+          "bu_ratio": 79.73089601356521,
+          "retransmits": 434,
+          "cpu_host_total": 0.083267346929337,
+          "cpu_host_system": 0.0669490986439257,
+          "bidirectional_duration_ms": 604.0,
+          "src2dst_duration_ms": 604.0,
+          "dst2src_duration_ms": 482.0,
+          "bidirectional_mean_piat_ms": 40.26666666666667,
+          "bidirectional_stddev_piat_ms": 66.24895327115598,
+          "bidirectional_max_piat_ms": 201.0,
+          "src2dst_mean_piat_ms": 75.5,
+          "src2dst_stddev_piat_ms": 84.51880602226095,
+          "src2dst_max_piat_ms": 201.0,
+          "dst2src_mean_piat_ms": 80.33333333333334,
+          "dst2src_stddev_piat_ms": 98.63400360254401,
+          "dst2src_max_piat_ms": 242.0
+        },
+        "traffic_level": 1,
+        "p_high_traffic": 0.137882,
+        "probe_s": 42.1,
+        "inference_ms": 1.5563
+      },
+      {
+        "index": 2,
+        "switches": [
+          "s23",
+          "s22",
+          "s21",
+          "s18",
+          "s17",
+          "s16",
+          "s15"
+        ],
+        "features": {
+          "average_rtt": 120.143,
+          "packet_loss": 0.0,
+          "bits_per_second": 5661370.046435287,
+          "bu_ratio": 43.38629953564713,
+          "retransmits": 968,
+          "cpu_host_total": 0.176408610388093,
+          "cpu_host_system": 0.15749245895995476,
+          "bidirectional_duration_ms": 605.0,
+          "src2dst_duration_ms": 605.0,
+          "dst2src_duration_ms": 482.0,
+          "bidirectional_mean_piat_ms": 40.33333333333333,
+          "bidirectional_stddev_piat_ms": 66.42360452501234,
+          "bidirectional_max_piat_ms": 201.0,
+          "src2dst_mean_piat_ms": 75.62500000000001,
+          "src2dst_stddev_piat_ms": 84.59810450426349,
+          "src2dst_max_piat_ms": 201.0,
+          "dst2src_mean_piat_ms": 80.33333333333334,
+          "dst2src_stddev_piat_ms": 98.38834619337123,
+          "dst2src_max_piat_ms": 241.0
+        },
+        "traffic_level": 1,
+        "p_high_traffic": 0.052088,
+        "probe_s": 43.43,
+        "inference_ms": 1.4407
+      },
+      {
+        "index": 3,
+        "switches": [
+          "s23",
+          "s19",
+          "s12",
+          "s8",
+          "s7",
+          "s11",
+          "s14",
+          "s15"
+        ],
+        "features": {
+          "average_rtt": 140.146,
+          "packet_loss": 0.0,
+          "bits_per_second": 7127362.983200995,
+          "bu_ratio": 28.72637016799004,
+          "retransmits": 666,
+          "cpu_host_total": 0.17101540227515655,
+          "cpu_host_system": 0.1401437524753563,
+          "bidirectional_duration_ms": 724.0,
+          "src2dst_duration_ms": 724.0,
+          "dst2src_duration_ms": 570.0,
+          "bidirectional_mean_piat_ms": 48.266666666666666,
+          "bidirectional_stddev_piat_ms": 79.63978426700588,
+          "bidirectional_max_piat_ms": 242.0,
+          "src2dst_mean_piat_ms": 90.5,
+          "src2dst_stddev_piat_ms": 100.85208404957658,
+          "src2dst_max_piat_ms": 242.0,
+          "dst2src_mean_piat_ms": 95.0,
+          "dst2src_stddev_piat_ms": 114.89125293076057,
+          "dst2src_max_piat_ms": 283.0
+        },
+        "traffic_level": 1,
+        "p_high_traffic": 0.014613,
+        "probe_s": 45.57,
+        "inference_ms": 14.2606
+      },
+      {
+        "index": 4,
+        "switches": [
+          "s23",
+          "s22",
+          "s21",
+          "s18",
+          "s8",
+          "s11",
+          "s14",
+          "s15"
+        ],
+        "features": {
+          "average_rtt": 140.202,
+          "packet_loss": 0.0,
+          "bits_per_second": 4997383.36734547,
+          "bu_ratio": 50.0261663265453,
+          "retransmits": 542,
+          "cpu_host_total": 0.15403386572790326,
+          "cpu_host_system": 0.11976195218263279,
+          "bidirectional_duration_ms": 705.0,
+          "src2dst_duration_ms": 705.0,
+          "dst2src_duration_ms": 562.0,
+          "bidirectional_mean_piat_ms": 47.00000000000001,
+          "bidirectional_stddev_piat_ms": 78.50204728904481,
+          "bidirectional_max_piat_ms": 241.0,
+          "src2dst_mean_piat_ms": 88.125,
+          "src2dst_stddev_piat_ms": 99.11240011796131,
+          "src2dst_max_piat_ms": 241.0,
+          "dst2src_mean_piat_ms": 93.66666666666667,
+          "dst2src_stddev_piat_ms": 114.9637624065369,
+          "dst2src_max_piat_ms": 282.0
+        },
+        "traffic_level": 1,
+        "p_high_traffic": 0.037348,
+        "probe_s": 43.46,
+        "inference_ms": 1.4405
+      }
+    ]
+  },
+  "chosen_path": [
+    "s15",
+    "s14",
+    "s11",
+    "s8",
+    "s12",
+    "s19",
+    "s23"
+  ],
+  "chosen_ground_truth": {
+    "bottleneck_load": 0.2474,
+    "class": 0,
+    "class_name": "Extremely Low"
+  }
+}

@@ -1,0 +1,306 @@
+{
+  "approach": "geant2_ml",
+  "floodlight_metric": "hopcount",
+  "candidates": [
+    {
+      "index": 0,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2871,
+        "class": 1,
+        "class_name": "Low"
+      }
+    },
+    {
+      "index": 1,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2871,
+        "class": 1,
+        "class_name": "Low"
+      }
+    },
+    {
+      "index": 2,
+      "path": [
+        "s15",
+        "s16",
+        "s17",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.7108,
+        "class": 2,
+        "class_name": "High"
+      }
+    },
+    {
+      "index": 3,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s7",
+        "s8",
+        "s12",
+        "s19",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.2871,
+        "class": 1,
+        "class_name": "Low"
+      }
+    },
+    {
+      "index": 4,
+      "path": [
+        "s15",
+        "s14",
+        "s11",
+        "s8",
+        "s18",
+        "s21",
+        "s22",
+        "s23"
+      ],
+      "ground_truth": {
+        "bottleneck_load": 0.246,
+        "class": 0,
+        "class_name": "Extremely Low"
+      }
+    }
+  ],
+  "stage2": {
+    "model": "Gradient Boosting",
+    "chosen_index": 4,
+    "chosen": [
+      "s15",
+      "s14",
+      "s11",
+      "s8",
+      "s18",
+      "s21",
+      "s22",
+      "s23"
+    ],
+    "scored": [
+      {
+        "index": 0,
+        "switches": [
+          "s15",
+          "s14",
+          "s11",
+          "s8",
+          "s12",
+          "s19",
+          "s23"
+        ],
+        "features": {
+          "rtt_avg_ms": 120.289,
+          "rtt_min_ms": 120.152,
+          "rtt_max_ms": 122.878,
+          "rtt_mdev_ms": 0.371,
+          "packet_loss_pct": 0.0,
+          "throughput_mbps": 6.3469,
+          "bw_utilization_pct": 36.5313,
+          "retransmits": 0.0,
+          "hop_count": 6.0,
+          "path_max_link_util_pct": 29.5374,
+          "path_mean_link_util_pct": 18.511
+        },
+        "predicted_class": 1,
+        "predicted_name": "Low",
+        "probabilities": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "expected_class": 1.0,
+        "probe_s": 12.36,
+        "inference_ms": 1.7301
+      },
+      {
+        "index": 1,
+        "switches": [
+          "s15",
+          "s16",
+          "s17",
+          "s8",
+          "s12",
+          "s19",
+          "s23"
+        ],
+        "features": {
+          "rtt_avg_ms": 120.232,
+          "rtt_min_ms": 120.09,
+          "rtt_max_ms": 121.145,
+          "rtt_mdev_ms": 0.135,
+          "packet_loss_pct": 0.0,
+          "throughput_mbps": 6.3534,
+          "bw_utilization_pct": 36.4662,
+          "retransmits": 0.0,
+          "hop_count": 6.0,
+          "path_max_link_util_pct": 29.5374,
+          "path_mean_link_util_pct": 17.7508
+        },
+        "predicted_class": 1,
+        "predicted_name": "Low",
+        "probabilities": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "expected_class": 1.0,
+        "probe_s": 12.34,
+        "inference_ms": 0.8421
+      },
+      {
+        "index": 2,
+        "switches": [
+          "s15",
+          "s16",
+          "s17",
+          "s18",
+          "s21",
+          "s22",
+          "s23"
+        ],
+        "features": {
+          "rtt_avg_ms": 120.289,
+          "rtt_min_ms": 120.148,
+          "rtt_max_ms": 122.945,
+          "rtt_mdev_ms": 0.381,
+          "packet_loss_pct": 0.0,
+          "throughput_mbps": 3.3589,
+          "bw_utilization_pct": 66.4112,
+          "retransmits": 0.0,
+          "hop_count": 6.0,
+          "path_max_link_util_pct": 73.1875,
+          "path_mean_link_util_pct": 18.2361
+        },
+        "predicted_class": 2,
+        "predicted_name": "High",
+        "probabilities": [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "expected_class": 2.0,
+        "probe_s": 12.67,
+        "inference_ms": 0.8489
+      },
+      {
+        "index": 3,
+        "switches": [
+          "s15",
+          "s14",
+          "s11",
+          "s7",
+          "s8",
+          "s12",
+          "s19",
+          "s23"
+        ],
+        "features": {
+          "rtt_avg_ms": 140.301,
+          "rtt_min_ms": 140.137,
+          "rtt_max_ms": 143.772,
+          "rtt_mdev_ms": 0.497,
+          "packet_loss_pct": 0.0,
+          "throughput_mbps": 6.353,
+          "bw_utilization_pct": 36.4701,
+          "retransmits": 0.0,
+          "hop_count": 7.0,
+          "path_max_link_util_pct": 29.5374,
+          "path_mean_link_util_pct": 19.0313
+        },
+        "predicted_class": 1,
+        "predicted_name": "Low",
+        "probabilities": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "expected_class": 1.0,
+        "probe_s": 12.46,
+        "inference_ms": 0.8743
+      },
+      {
+        "index": 4,
+        "switches": [
+          "s15",
+          "s14",
+          "s11",
+          "s8",
+          "s18",
+          "s21",
+          "s22",
+          "s23"
+        ],
+        "features": {
+          "rtt_avg_ms": 140.314,
+          "rtt_min_ms": 140.16,
+          "rtt_max_ms": 143.248,
+          "rtt_mdev_ms": 0.421,
+          "packet_loss_pct": 0.0,
+          "throughput_mbps": 6.5623,
+          "bw_utilization_pct": 34.3771,
+          "retransmits": 0.0,
+          "hop_count": 7.0,
+          "path_max_link_util_pct": 25.318,
+          "path_mean_link_util_pct": 12.4602
+        },
+        "predicted_class": 0,
+        "predicted_name": "Extremely Low",
+        "probabilities": [
+          0.9998,
+          0.0002,
+          0.0,
+          0.0
+        ],
+        "expected_class": 0.0002,
+        "probe_s": 12.41,
+        "inference_ms": 0.8602
+      }
+    ]
+  },
+  "chosen_path": [
+    "s15",
+    "s14",
+    "s11",
+    "s8",
+    "s18",
+    "s21",
+    "s22",
+    "s23"
+  ],
+  "chosen_ground_truth": {
+    "bottleneck_load": 0.246,
+    "class": 0,
+    "class_name": "Extremely Low"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "XGBoost",
+  "feature_set": "active",
+  "features": [
+    "rtt_avg_ms",
+    "rtt_min_ms",
+    "rtt_max_ms",
+    "rtt_mdev_ms",
+    "packet_loss_pct",
+    "throughput_mbps",
+    "bw_utilization_pct",
+    "retransmits",
+    "hop_count"
+  ],
+  "metrics": {
+    "accuracy": 0.9733,
+    "precision": 0.9762,
+    "recall": 0.973,
+    "f1": 0.9736,
+    "val_f1": 0.9595,
+    "train_s": 0.3994,
+    "infer_ms_per_path": 0.0175
+  }
+}
