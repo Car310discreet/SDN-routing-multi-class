@@ -132,7 +132,7 @@ All files are in `geant2/results/`: `training/`, `training_active/` and `evaluat
 
 ### Dataset
 
-- 500 rows, 125 per class, measured on the live network over 66 epochs.
+- 500 rows, 125 per class, measured on the live network over 65 epochs.
 - 3 rows (0.6 %) carry a label that does not match the measurement: a background flow did not start, so
   Floodlight measured far less load than was set. They are kept.
 
@@ -151,6 +151,9 @@ Test set: 75 rows. The best model is chosen on validation F1.
 - Controller-measured link utilisation accounts for 82 % of Gradient Boosting's feature importance.
 - Without the two controller features (`--feature-set active`), the tree ensembles still reach 0.973
   and SVM 0.907. XGBoost is best on validation; it is saved as `best_model_active.joblib`.
+- All eight models (`--models all`), in `results/training_all8/`: Bagging also reaches 0.973, Decision
+  Tree 0.960, Logistic Regression 0.933 and AdaBoost 0.507. Gradient Boosting, Bagging and Decision Tree
+  tie on validation F1 (0.987). The full write-up is in [REPORT.md](REPORT.md).
 
 ### Routing and video
 

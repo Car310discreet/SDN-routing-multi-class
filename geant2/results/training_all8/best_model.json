@@ -1,0 +1,26 @@
+{
+  "name": "Decision Tree",
+  "feature_set": "all",
+  "features": [
+    "rtt_avg_ms",
+    "rtt_min_ms",
+    "rtt_max_ms",
+    "rtt_mdev_ms",
+    "packet_loss_pct",
+    "throughput_mbps",
+    "bw_utilization_pct",
+    "retransmits",
+    "hop_count",
+    "path_max_link_util_pct",
+    "path_mean_link_util_pct"
+  ],
+  "metrics": {
+    "accuracy": 0.96,
+    "precision": 0.9618,
+    "recall": 0.9598,
+    "f1": 0.9605,
+    "val_f1": 0.9868,
+    "train_s": 0.0016,
+    "infer_ms_per_path": 0.0019
+  }
+}
