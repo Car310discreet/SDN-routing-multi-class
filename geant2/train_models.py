@@ -34,6 +34,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier, GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score
@@ -61,7 +62,9 @@ def build_models(names: list[str] | None = None) -> dict:
     models = {
         "Logistic Regression": scaled(LogisticRegression(max_iter=2000, class_weight="balanced", random_state=SEED)),
         "Decision Tree": DecisionTreeClassifier(class_weight="balanced", random_state=SEED),
-        "SVM": scaled(SVC(kernel="rbf", probability=True, class_weight="balanced", random_state=SEED)),
+        # SVC(probability=True) is deprecated in scikit-learn 1.9; calibrate explicitly instead
+        "SVM": scaled(CalibratedClassifierCV(SVC(kernel="rbf", class_weight="balanced", random_state=SEED),
+                                             ensemble=False)),
         "XGBoost": xgb.XGBClassifier(objective="multi:softprob", eval_metric="mlogloss", early_stopping_rounds=10,
                                      n_estimators=500, random_state=SEED),
         "Random Forest": RandomForestClassifier(n_estimators=300, class_weight="balanced", random_state=SEED),
