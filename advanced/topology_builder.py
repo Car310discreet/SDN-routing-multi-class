@@ -303,46 +303,59 @@ class TrafficGenerator:
             self.flow_names += self.installer.install_path(self.spec.hosts[a].ip, self.spec.hosts[b].ip, [u, v],
                                                            prefix=f"bg_{u}_{v}", priority=self.PIN_PRIORITY)
             for direction, (src, dst) in enumerate(((a, b), (b, a))):
-                port = self.port_base + 2 * index + direction
-                self.flows.append(((u, v), src, dst, port))
-                self.servers.append(self.net.get(dst).popen(["iperf3", "-s", "-p", str(port)],
-                                                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
-        time.sleep(1)
+                self.flows.append(((u, v), src, dst, self.port_base + 2 * index + direction))
         log.info("Pinned %d background flows on %d links", len(self.flows), self.spec.graph.number_of_edges())
 
-    def _stop_clients(self) -> None:
-        for proc in self.clients:
+    @staticmethod
+    def _terminate(procs) -> None:
+        for proc in procs:
             if proc.poll() is None:
                 proc.terminate()
-        for proc in self.clients:
+        for proc in procs:
             try:
                 proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 proc.kill()
-        self.clients = []
 
-    def apply(self, scenario: Scenario) -> None:
-        """Restart the clients at the rates of `scenario` (both directions of a link get the same load)."""
-        self._stop_clients()
-        if self.scenario is not None:
-            time.sleep(1)                  # let the servers reset after the previous test
-        for key, src, dst, port in self.flows:
-            rate = scenario.utilization[key] * self.spec.link_bw_mbps
-            if rate < self.MIN_RATE_MBPS:
-                continue
-            self.clients.append(self.net.get(src).popen(
-                ["iperf3", "-c", self.spec.hosts[dst].ip, "-p", str(port), "-u", "-b", f"{rate:.3f}M",
-                 "-t", str(self.DURATION_S)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+    def _launch(self, key, src, dst, port, rate):
+        return self.net.get(src).popen(
+            ["iperf3", "-c", self.spec.hosts[dst].ip, "-p", str(port), "-u", "-b", f"{rate:.3f}M",
+             "-t", str(self.DURATION_S)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def apply(self, scenario: Scenario, retries: int = 3) -> None:
+        """Run the flows at the rates of `scenario` (both directions of a link get the same load).
+
+        Servers are restarted with the clients: a server whose old client was killed on an overloaded
+        link may never see the end of that test (its control messages sit in the full queue) and then
+        refuses the next client as busy - silently leaving the most congested links idle. Every client
+        is checked to be running a few seconds after start, and restarted if it is not."""
+        self._terminate(self.clients)
+        self._terminate(self.servers)
+        self.servers = [self.net.get(dst).popen(["iperf3", "-s", "-p", str(port)], stdout=subprocess.DEVNULL,
+                                                stderr=subprocess.DEVNULL) for _, _, dst, port in self.flows]
+        time.sleep(1)
+        wanted = [(flow, scenario.utilization[flow[0]] * self.spec.link_bw_mbps) for flow in self.flows]
+        wanted = [(flow, rate) for flow, rate in wanted if rate >= self.MIN_RATE_MBPS]
+        running = {flow: self._launch(*flow, rate) for flow, rate in wanted}
+        for attempt in range(retries + 1):
+            time.sleep(3)
+            failed = [(flow, rate) for flow, rate in wanted if running[flow].poll() is not None]
+            if not failed:
+                break
+            if attempt == retries:
+                raise RuntimeError(f"{len(failed)} background flows would not start, e.g. {failed[0][0]}")
+            log.warning("%d background flows exited at start; restarting them", len(failed))
+            for flow, rate in failed:
+                running[flow] = self._launch(*flow, rate)
+        self.clients = list(running.values())
         self.scenario = scenario
         counts = Counter(class_of(u) for u in scenario.utilization.values())
         log.info("Scenario %s: links per class %s", scenario.seed,
                  ", ".join(f"{CLASS_NAMES[c]} {counts.get(c, 0)}" for c in range(len(CLASS_NAMES))))
 
     def stop(self) -> None:
-        self._stop_clients()
-        for proc in self.servers:
-            if proc.poll() is None:
-                proc.terminate()
+        self._terminate(self.clients)
+        self._terminate(self.servers)
         self.installer.remove(self.flow_names)
         self.servers, self.flows, self.flow_names = [], [], []
 

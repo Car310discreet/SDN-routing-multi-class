@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import multimedia_evaluator  # noqa: E402
 import udp_probe  # noqa: E402
 import visualize_benchmarks  # noqa: E402
 from path_discovery import (METHODS, CandidatePath, composite_link_costs, discover_paths,  # noqa: E402
@@ -183,6 +184,26 @@ def test_udp_probe_loss_and_jitter():
     stats = udp_probe.per_second(sent, recv, 100.0, 2)
     assert stats[1]["loss_pct"] == pytest.approx(10.0) and stats[2]["loss_pct"] == 0.0
     assert stats[2]["jitter_ms"] == pytest.approx(0.0, abs=1e-6)
+
+
+def test_route_counters_exclude_probe(tmp_path):
+    dump = (" cookie=0x0, duration=5s, table=0, n_packets=120, n_bytes=150000, priority=32768,ip,in_port=3 actions=output:2\n"
+            " cookie=0x0, duration=9s, table=0, n_packets=5, n_bytes=490, priority=1,ip actions=CONTROLLER:65535\n")
+    assert multimedia_evaluator.parse_flow_counters(dump) == (125, 150490)
+
+    start = 1000.0
+    sent, recv = tmp_path / "sent.csv", tmp_path / "recv.csv"
+    sent.write_text("seq,send_ts\n" + "".join(f"{i},{start + i * 0.5:.6f}\n" for i in range(4)))
+    recv.write_text("seq,send_ts,recv_ts\n" + "".join(f"{i},{start + i * 0.5:.6f},{start + i * 0.5 + 0.1:.6f}\n"
+                                                      for i in (0, 1, 3)))
+    rows = [{"t_s": 1, "throughput_mbps": 1.0}, {"t_s": 2, "throughput_mbps": 1.0}]
+    totals = {"sent": 100, "received": 90}
+    multimedia_evaluator.VideoEvaluator._merge_probe(rows, totals, str(sent), str(recv), start)
+    assert totals == {"sent": 96, "received": 87}
+    frame_mbit = multimedia_evaluator.PROBE_FRAME_BYTES * 8 / 1e6
+    assert rows[0]["throughput_mbps"] == pytest.approx(1.0 - 2 * frame_mbit, abs=1e-4)
+    assert rows[1]["throughput_mbps"] == pytest.approx(1.0 - frame_mbit, abs=1e-4)
+    assert rows[1]["packet_loss_pct"] == 50.0
 
 
 def test_visualize_writes_all_figures(tmp_path):

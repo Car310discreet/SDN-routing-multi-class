@@ -9,8 +9,11 @@ For one routing paradigm, `VideoEvaluator.run()`:
        jitter, loss a 200 kbit/s connectionless UDP probe Sender -> Receiver on the same route
                     (udp_probe.py): per-second loss from sequence numbers, RFC 3550 jitter from
                     shared-clock transit times; it keeps working where iperf3's handshake would fail
-       throughput   bytes delivered to the Receiver per second (its access switch port counters)
-     summary.json also holds the exact whole-stream video packet loss (access-port counters);
+       throughput   video bytes delivered to the Receiver per second
+     summary.json also holds the exact whole-stream video packet loss.
+     Both come from the OpenFlow counters of the Sender -> Receiver route entries on the first and last
+     switch, minus the UDP probe's datagrams. Access-port counters cannot be used: the background
+     generator also sources and sinks iperf3 flows at the Sender's and Receiver's hosts;
   3. scores the received video frame by frame (frames.csv: frame, psnr_db, ssim) and overall.
 
 Video scoring uses FFmpeg's native H.264 decoder from the imageio-ffmpeg package, which conceals errors:
@@ -76,9 +79,21 @@ class StreamSummary:
     ssim_frame_mean: float | None
 
 
-def _read_counter(interface: str, name: str) -> int:
-    with open(f"/sys/class/net/{interface}/statistics/{name}") as handle:
-        return int(handle.read())
+PROBE_FRAME_BYTES = 1000 + 8 + 20 + 14     # probe payload + UDP + IPv4 + Ethernet, as OVS counts it
+
+
+def parse_flow_counters(dump: str) -> tuple[int, int]:
+    """Summed (n_packets, n_bytes) of every flow in an `ovs-ofctl dump-flows` output."""
+    packets = sum(int(v) for v in re.findall(r"n_packets=(\d+)", dump))
+    octets = sum(int(v) for v in re.findall(r"n_bytes=(\d+)", dump))
+    return packets, octets
+
+
+def route_counters(switch: str, src_ip: str, dst_ip: str) -> tuple[int, int]:
+    """(packets, bytes) that `switch` has forwarded from src_ip to dst_ip (root only)."""
+    proc = subprocess.run(["ovs-ofctl", "-O", "OpenFlow13", "dump-flows", switch,
+                           f"ip,nw_src={src_ip},nw_dst={dst_ip}"], capture_output=True, text=True, check=True)
+    return parse_flow_counters(proc.stdout)
 
 
 class _PingSampler(threading.Thread):
@@ -130,8 +145,8 @@ class VideoEvaluator:
         received_path = os.path.join(out_dir, "received.ts")
         server, client = self.net.get(self.server_host), self.net.get(self.client_host)
         server_ip, client_ip = self.spec.hosts[self.server_host].ip, self.spec.hosts[self.client_host].ip
-        rx_intf = self.spec.access_interface(self.client_host)
-        tx_intf = self.spec.access_interface(self.server_host)
+        tx_switch = self.spec.hosts[self.server_host].switch
+        rx_switch = self.spec.hosts[self.client_host].switch
         url = f"udp://{client_ip}:{VIDEO_PORT}"
         probe_sent, probe_recv = os.path.join(out_dir, "probe_sent.csv"), os.path.join(out_dir, "probe_recv.csv")
 
@@ -151,7 +166,7 @@ class VideoEvaluator:
             sender = server.popen(["ffmpeg", "-hide_banner", "-re", "-i", self.video_path, "-c", "copy",
                                    "-f", "mpegts", url], stdout=tx_log, stderr=subprocess.STDOUT)
             try:
-                rows, totals = self._sample(sender, pinger, rx_intf, tx_intf)
+                rows, totals = self._sample(sender, pinger, tx_switch, rx_switch, server_ip, client_ip)
             finally:
                 if sender.poll() is None:
                     sender.terminate()
@@ -168,7 +183,7 @@ class VideoEvaluator:
                     receiver.kill()
                 pinger.stop()
 
-        self._merge_probe(rows, probe_sent, probe_recv, stream_start)
+        self._merge_probe(rows, totals, probe_sent, probe_recv, stream_start)
         with open(os.path.join(out_dir, "timeseries.csv"), "w", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=["t_s", "rtt_ms", "jitter_ms", "throughput_mbps",
                                                         "packet_loss_pct"])
@@ -183,12 +198,13 @@ class VideoEvaluator:
                  summary.mean_jitter_ms, summary.mean_throughput_mbps)
         return summary
 
-    def _sample(self, sender, pinger, rx_intf, tx_intf, step=0.1, drain_s=2.5):
-        """Access-port counters every `step` s while the video plays: per-second throughput and RTT,
-        whole-stream packet totals."""
+    def _sample(self, sender, pinger, tx_switch, rx_switch, server_ip, client_ip, step=0.25, drain_s=2.5):
+        """Route-entry counters every `step` s while the video plays: per-second throughput and RTT,
+        whole-stream packet totals (still including the UDP probe, removed by _merge_probe)."""
         def read():
-            return (time.time(), _read_counter(rx_intf, "tx_bytes"), _read_counter(rx_intf, "tx_packets"),
-                    _read_counter(tx_intf, "rx_packets"))
+            rx_pkts, rx_bytes = route_counters(rx_switch, server_ip, client_ip)
+            tx_pkts, _ = route_counters(tx_switch, server_ip, client_ip)
+            return time.time(), rx_bytes, rx_pkts, tx_pkts
 
         history = [read()]
         start, sender_end = history[0][0], None
@@ -213,17 +229,28 @@ class VideoEvaluator:
         return rows, totals
 
     @staticmethod
-    def _merge_probe(rows, sent_path, recv_path, start):
+    def _merge_probe(rows, totals, sent_path, recv_path, start):
+        """Per-second probe loss and jitter into `rows`; the probe's own datagrams out of the
+        route counters, so throughput and whole-stream loss are the video's alone."""
         try:
             with open(sent_path) as sent, open(recv_path) as received:
-                stats = udp_probe.per_second(list(csv.DictReader(sent)), list(csv.DictReader(received)),
-                                             start, len(rows))
+                sent_rows, recv_rows = list(csv.DictReader(sent)), list(csv.DictReader(received))
+            stats = udp_probe.per_second(sent_rows, recv_rows, start, len(rows))
         except (OSError, ValueError, KeyError) as exc:
-            log.warning("UDP probe logs unusable (%s); per-second loss and jitter left empty", exc)
+            log.warning("UDP probe logs unusable (%s); per-second loss and jitter left empty, "
+                        "throughput includes the probe", exc)
             return
+        totals["sent"] = max(0, totals["sent"] - len(sent_rows))
+        totals["received"] = max(0, totals["received"] - len(recv_rows))
+        probe_bytes = {}
+        for row in recv_rows:
+            second = int(float(row["recv_ts"]) - start) + 1
+            probe_bytes[second] = probe_bytes.get(second, 0) + PROBE_FRAME_BYTES
         for row in rows:
             row["packet_loss_pct"] = stats[row["t_s"]]["loss_pct"]
             row["jitter_ms"] = stats[row["t_s"]]["jitter_ms"]
+            row["throughput_mbps"] = round(max(0.0, row["throughput_mbps"] - probe_bytes.get(row["t_s"], 0) * 8 / 1e6),
+                                           4)
 
     # -- video quality ------------------------------------------------------------------------
     def decoded_frames(self, path: str) -> int:

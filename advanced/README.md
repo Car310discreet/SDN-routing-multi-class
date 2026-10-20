@@ -157,4 +157,25 @@ Stage 2 runs a single `predict_proba` call over all K candidates, so its cost do
 live decision the dominant cost is measurement: about 12 s of link telemetry plus about 10 s of probing (ping, iperf3, queue drain) per
 candidate. Computation is small next to that.
 
-The live Mininet benchmark for this branch has not been run yet. The commands above produce it.
+### Live benchmark (Mininet + Floodlight, 3 scenarios, `--congest-default-path`)
+
+Run `results/advanced/advanced_20261020_202810` used scenario seeds 1000–1002. In every scenario, the 6 links of
+the hop-count shortest path are forced to Extremely High (80–120 % load). Values are means over the
+3 scenarios:
+
+| Paradigm | Chosen path class (0–3) | Video loss | PSNR | SSIM | RTT | Jitter | Throughput |
+|---|---|---|---|---|---|---|---|
+| Hop-count | 3.00 | 99.6 % | 15.1 dB | 0.727 | all echoes lost | 24.1 ms | 0.02 Mbit/s |
+| QoS-aware | 1.00 | 6.7 % | 31.3 dB | 0.928 | 505 ms | 12.0 ms | 4.33 Mbit/s |
+| Hop candidates + ML | 1.00 | 6.8 % | 31.3 dB | 0.929 | 510 ms | 12.2 ms | 4.31 Mbit/s |
+| **Combined (multi-metric + ML)** | **0.33** | **0.0 %** | **38.4 dB** | **0.998** | **161 ms** | 12.9 ms | **4.65 Mbit/s** |
+
+The combined architecture delivered the video loss-free in all three scenarios.
+
+- **Scenarios 1 and 2:** QoS-aware and hop + ML were also loss-free.
+- **Scenario 0:** both of them stayed on a 6-hop High-class path and lost 20 % of the video. The combined
+  method's composite Stage 1 offered a 7-hop path whose links were all Extremely Low, and Stage 2 chose it.
+
+Live Stage 2 inference took 40–60 ms, above the offline figure because Mininet loads the CPU. Probing the
+candidates took 81 s per decision for the combined method and 195 s for hop + ML: probes on congested
+candidates wait for ping and iperf3 timeouts.
