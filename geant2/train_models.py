@@ -97,7 +97,7 @@ def load_dataset(path: str, features: list[str]) -> tuple[np.ndarray, np.ndarray
     return df[features].to_numpy(dtype=float), y
 
 
-def plot_comparison(table: pd.DataFrame, best: str, path: str) -> None:
+def plot_comparison(table: pd.DataFrame, best: str, path: str, note: str | None = None) -> None:
     sys.path.append(os.path.join(os.path.dirname(GEANT2_DIR), "baseline"))
     import matplotlib.pyplot as plt
     from visualize_benchmarks import COLORS, INK, INK_2, MUTED, apply_style
@@ -117,7 +117,7 @@ def plot_comparison(table: pd.DataFrame, best: str, path: str) -> None:
         ax.set_title(title)
         ax.grid(axis="y", visible=False)
         ax.tick_params(axis="y", length=0)
-    fig.suptitle(f"Test-set scores; best on validation F1: {best} (blue)", x=0.01, ha="left",
+    fig.suptitle(note or f"Test-set scores; best on validation F1: {best} (blue)", x=0.01, ha="left",
                  fontsize=9, color=MUTED)
     fig.tight_layout()
     fig.savefig(path)
@@ -163,7 +163,7 @@ def train(args) -> str:
     print(pd.DataFrame(cm, index=CLASS_NAMES, columns=CLASS_NAMES).to_string())
 
     os.makedirs(args.results, exist_ok=True)
-    table.round(4).to_csv(os.path.join(args.results, "model_comparison.csv"), index=False)
+    table.round(6).to_csv(os.path.join(args.results, "model_comparison.csv"), index=False)
     pd.DataFrame(cm, index=CLASS_NAMES, columns=CLASS_NAMES).to_csv(os.path.join(args.results, "confusion_matrix.csv"))
     plot_comparison(table, best, os.path.join(args.results, "model_comparison.png"))
 

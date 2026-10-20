@@ -18,7 +18,7 @@
     "recall": 0.973,
     "f1": 0.9736,
     "val_f1": 0.9595,
-    "train_s": 3.5305,
-    "infer_ms_per_path": 0.1841
+    "train_s": 0.2289,
+    "infer_ms_per_path": 0.1453
   }
 }

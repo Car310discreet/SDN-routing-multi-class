@@ -86,7 +86,7 @@ The system has four layers:
 All code is in the `geant2/` directory of the repository. Baseline components are reused unchanged: the
 static-flow installer, Yen's algorithm, AIRSDN's path prober and classifier, and the video evaluator.
 
-[Insert Figure 1: System architecture — Mininet/OVS data plane, Floodlight REST API, traffic generator, telemetry collector, classifier, routing controller]
+![System architecture. The measurement and learning layer generates traffic, collects telemetry and trains the classifier. The routing controller uses the trained model and drives Floodlight through its REST API. Floodlight controls the 24 Open vSwitch switches over OpenFlow. The evaluation layer streams and scores video between the Sender and Receiver.](../report/figures/architecture.png)
 
 ### 2.1 Network topology
 
@@ -108,9 +108,9 @@ set is diverse. Four of its five shortest paths cross the `s8` hub, but one
 (`s15-s16-s17-s18-s21-s22-s23`) avoids both `s8` and `s12`, so routing choices lead to genuinely
 different loads.
 
-[Insert Figure 2: GEANT2 topology with Sender and Receiver — `geant2/figures/geant2_topology.png`]
+![The GEANT2 topology as implemented: 24 switches and 37 links. The Sender (h15 on s15) and Receiver (h23 on s23) are 6 hops apart, the network diameter. Every switch also has a background-traffic host, not drawn.](figures/geant2_topology.png)
 
-[Insert Figure 3: The five hop-count candidate paths — `geant2/figures/geant2_candidates.png`]
+![The five hop-count candidate paths from Sender to Receiver (Yen's algorithm, K = 5): three of 6 hops and two of 7 hops. Candidate 2 avoids the s8 hub.](figures/geant2_candidates.png)
 
 **Implementation note: controller stability.** With IPv6 enabled on the switch ports, link-local IPv6
 traffic reached Open vSwitch carrying a packet mark. Open vSwitch then reported a `pkt_mark` field in its
@@ -233,7 +233,7 @@ For each Sender → Receiver decision, the controller:
 
 The probes match only ICMP and TCP, so probing never moves the UDP video stream.
 
-[Insert Figure 4: Routing pipeline sequence — candidates → telemetry → classification → selection → flow installation]
+![The per-decision routing pipeline. After computing the candidates and reading passive telemetry once, the controller pins, measures and classifies each candidate in turn. It then selects the lowest predicted class and installs the route.](../report/figures/routing_pipeline.png)
 
 ---
 
@@ -254,7 +254,7 @@ All eight models, all 11 features, on the 75-row test set:
 | SVM (RBF) | Kernel | 0.933 | 0.942 | 0.931 | 0.931 | 0.933 | 0.021 |
 | AdaBoost | Boosting | 0.507 | 0.254 | 0.500 | 0.337 | 0.327 | 0.233 |
 
-[Insert Bar Chart: Classifier Comparison — Accuracy, Precision, F1 (`geant2/results/training_all8/model_comparison.png`)]
+![Test-set accuracy, macro precision and macro F1 of the eight classifiers (75 rows, all 11 features). The deployed model, Gradient Boosting, is highlighted.](../report/figures/model_comparison.png)
 
 ### 3.2 Selection of the deployed model
 
@@ -366,7 +366,7 @@ its ping and TCP measurements hit congested routes during the run, even though t
 
 ### 4.3 Results
 
-Mean over three scenarios; the whiskers in the figures span minimum to maximum:
+Mean over three scenarios. In the figures, dots show the individual scenarios and lines span their range:
 
 | Approach | **PSNR (dB)** | **SSIM** | **RTT (ms)** | **Throughput (Mbps)** | **Packet loss (%)** | Frames decoded (of 4,007) |
 |---|---|---|---|---|---|---|
@@ -394,27 +394,28 @@ Per scenario:
 
 ² iperf3 could not hold its connection on the congested path, recorded as 0 Mbps (Section 4.1).
 
-[Insert Bar Chart: PSNR Comparison Here — panel 1 of `geant2/results/evaluation/summary.png`]
+![Video PSNR per approach. The bar is the mean of the three scenarios, the dots are the individual scenarios and the line spans their range.](../report/figures/metric_psnr_db.png)
 
-[Insert Bar Chart: SSIM Comparison Here — panel 2 of `geant2/results/evaluation/summary.png`]
+![Video SSIM per approach: mean of the three scenarios, with each scenario as a dot.](../report/figures/metric_ssim.png)
 
-[Insert Bar Chart: Mean RTT Comparison Here — panel 3 of `geant2/results/evaluation/summary.png`]
+![Mean round-trip time per approach (60 pings at 1 s intervals), with each scenario as a dot.](../report/figures/metric_mean_rtt_ms.png)
 
-[Insert Bar Chart: Mean Throughput Comparison Here — panel 4 of `geant2/results/evaluation/summary.png`]
+![Mean TCP throughput per approach (60 s iperf3), with each scenario as a dot. A path too congested for iperf3 to connect counts as 0 Mbps.](../report/figures/metric_mean_throughput_mbps.png)
 
-[Insert Bar Chart: Packet Loss Comparison Here — panel 5 of `geant2/results/evaluation/summary.png`]
+![Ping packet loss per approach, with each scenario as a dot.](../report/figures/metric_ping_loss_pct.png)
 
-[Insert Line Plot: RTT and Throughput over 60 s — `geant2/results/evaluation/rtt_throughput.png`]
+![Scenario 1, the congested scenario: per-second RTT and throughput on each approach's route. Dots mark the pings that were answered; the gaps between them are lost pings. Hop-count and QoS-aware routing show RTTs of 1.3–2.5 s, and iperf3 could not connect over their routes (drawn at 0 Mbps). The short spikes above the 10 Mbps link capacity are iperf3 reporting artifacts: data held up at the receiver is counted in the interval in which it is read. The 60 s means are unaffected.](../report/figures/scenario1_network.png)
 
-[Insert Line Plot: Per-frame PSNR and SSIM — `geant2/results/evaluation/video_quality.png`]
+![Scenario 1: per-frame PSNR and SSIM of the received video (60-frame rolling mean). Frames identical to the original (infinite PSNR) are drawn at 60 dB. AIRSDN (dashed) and the proposed method coincide: every frame arrives intact until the stream's final frames. Hop-count and QoS-aware routing degrade the whole video.](../report/figures/scenario1_video.png)
 
 ### 4.4 Discussion by metric
 
 **PSNR and SSIM.** Video quality is binary in practice.
 
 - On any uncongested path the stream arrives intact. Every such transfer scores 38.43 dB / 0.998, with
-  3,968 of 4,007 frames decoded. That is the measurement ceiling: the first 39 frames are not decodable at
-  the receiver in any run, whatever the approach.
+  3,968 of 4,007 frames decoded: frames 1–3,967 are identical to the original. That is the measurement
+  ceiling: the last 39 frames (about 0.6 s) are missing from the received file in every run, whatever the
+  approach.
 - Once the path cannot carry the video's roughly 4.5 Mbps, quality collapses:
   - QoS-aware on a *High* path (2.7 Mbps available): 16.8 dB, with 23 % of frames lost.
   - Hop-count on an *Extremely High* path: 14.8 dB and 0.743 SSIM, with only 785 of 4,007 frames
@@ -538,9 +539,14 @@ four congestion states and a comparison of eight classifiers. The main findings:
 
 ```bash
 git switch GEANT2
-./start_floodlight.sh                                   # separate terminal
-sudo SAMPLES=500 geant2/run_all.sh                      # dataset → models → 3 scenarios → figures
-.venv/bin/python geant2/train_models.py --models all    # eight-model comparison
+# separate terminal:
+./start_floodlight.sh
+# dataset, models, 3 scenarios, figures:
+sudo SAMPLES=500 geant2/run_all.sh
+# eight-model comparison:
+.venv/bin/python geant2/train_models.py --models all
+# this report as a PDF:
+report/build_pdf.sh
 ```
 
 | Artifact | Location |

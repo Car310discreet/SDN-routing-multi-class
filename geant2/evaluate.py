@@ -137,11 +137,20 @@ def plot_summary(per_scenario: pd.DataFrame, path: str) -> None:
     plt.close(fig)
 
 
+PSNR_CAP_DB = 60.0      # a frame identical to the original has infinite PSNR; draw it at this ceiling
+# AIRSDN and the multi-class model often choose equally good paths and produce identical curves: draw
+# AIRSDN dashed and on top so neither hides the other
+LINE_STYLE = {"airsdn": dict(linestyle=(0, (4, 3)), zorder=4)}
+
+
 def _mean_series(frames: list[pd.DataFrame], x: str, y: str) -> pd.Series:
     series = [df.set_index(x)[y] for df in frames if y in df]
     if not series:
         return pd.Series(dtype=float)
-    return pd.concat(series, axis=1).apply(pd.to_numeric, errors="coerce").mean(axis=1)
+    table = pd.concat(series, axis=1).apply(pd.to_numeric, errors="coerce")
+    if y == "psnr_db":
+        table = table.clip(upper=PSNR_CAP_DB)
+    return table.mean(axis=1)
 
 
 def plot_lines(data: dict, path: str, x: str, panels: list[tuple[str, str]], xlabel: str, rolling: int = 1) -> None:
@@ -156,7 +165,8 @@ def plot_lines(data: dict, path: str, x: str, panels: list[tuple[str, str]], xla
                 continue
             if rolling > 1:
                 series = series.rolling(rolling, min_periods=1).mean()
-            ax.plot(series.index, series.values, color=COLORS[approach], label=LABELS[approach])
+            ax.plot(series.index, series.values, color=COLORS[approach], label=LABELS[approach],
+                    **LINE_STYLE.get(approach, {}))
         ax.set_title(title)
         ax.grid(axis="x", color=GRID)
     np.atleast_1d(axes)[-1].set_xlabel(xlabel)
@@ -180,7 +190,7 @@ def evaluate(run_dir: str) -> pd.DataFrame:
                [("rtt_ms", "RTT (ms)"), ("throughput_mbps", "Throughput (Mbps)")],
                "Time (s)")
     plot_lines(data, os.path.join(out, "video_quality.png"), "frame",
-               [("psnr_db", "PSNR per frame (dB, 60-frame rolling mean)"), ("ssim", "SSIM per frame (60-frame rolling mean)")],
+               [("psnr_db", "PSNR per frame (dB, 60-frame rolling mean; identical frames at 60 dB)"), ("ssim", "SSIM per frame (60-frame rolling mean)")],
                "Frame", rolling=60)
     print(f"\n{run_dir}")
     print(summary.round(3).to_string())
