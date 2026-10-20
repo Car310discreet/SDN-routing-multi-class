@@ -22,6 +22,13 @@ SCENARIOS=${SCENARIOS:-3}
 LOG=results/geant2/run_all.log
 
 [ "$(id -u)" -eq 0 ] || { echo "Mininet needs root: sudo $0" >&2; exit 1; }
+
+# A suspended laptop stops Floodlight's timers and loses its topology: block sleep while running
+if [ -z "${GEANT2_INHIBITED:-}" ] && command -v systemd-inhibit >/dev/null; then
+    export GEANT2_INHIBITED=1
+    exec systemd-inhibit --what=sleep:idle:handle-lid-switch --who="GEANT2 pipeline" \
+        --why="Mininet experiment running" "$0" "$@"
+fi
 curl -sf http://127.0.0.1:8080/wm/core/health/json >/dev/null \
     || { echo "Floodlight is not running: start ./start_floodlight.sh first" >&2; exit 1; }
 

@@ -13,7 +13,10 @@ Each epoch:
   4. each path is labelled with the class of its bottleneck offered load (ground truth from the
      generator; no measured feature is used for the label).
 
-Rows are appended to the CSV as they are measured, so a run can be stopped and resumed. By default,
+Rows are appended to the CSV as they are measured, so a run can be stopped and resumed. A row whose
+path is below 80 % load but lost every ping is a measurement failure (the controller lost the path), not
+congestion, and is not written. An epoch whose Floodlight requests fail is skipped; three failed epochs
+in a row stop the run. By default,
 paths whose class already has `--samples / 4` rows are not probed, so the dataset ends up balanced.
 
 The default of 4,000 rows (1,000 per class) is about 360 rows per feature for 11 features, enough
@@ -43,7 +46,7 @@ from path_discovery import yen_hop_count  # noqa: E402
 from telemetry import FEATURE_NAMES, PathTelemetry, TelemetryClient  # noqa: E402
 from telemetry_and_model import ControllerError, FlowInstaller  # noqa: E402
 from topology_builder import stop_network  # noqa: E402
-from traffic_gen import CLASS_NAMES, TrafficGenerator, sample_scenario  # noqa: E402
+from traffic_gen import CLASS_BANDS, CLASS_NAMES, TrafficGenerator, sample_scenario  # noqa: E402
 
 log = logging.getLogger("collect_dataset")
 GEANT2_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -74,6 +77,29 @@ def epoch_paths(spec, rng: random.Random, candidates: list[list[str]], extra_pai
             continue                       # adjacent switches: a single link, already pinned by the generator
         probes.append((hosts_on(spec, a)[0], hosts_on(spec, b)[0], rng.choice(yen_hop_count(spec.graph, a, b, 5))))
     return probes
+
+
+def measure_epoch(spec, rng, candidates, args, scenario, counts, quota, installer, telemetry) -> list:
+    """Probe this epoch's paths; returns (src, dst, path, features, label) rows that passed the checks."""
+    rows, pending = [], Counter()
+    link_util = telemetry.link_utilization()
+    for index, (src, dst, path) in enumerate(epoch_paths(spec, rng, candidates, args.extra_pairs)):
+        label = scenario.path_class(path)
+        if args.balance and counts[label] + pending[label] >= quota:
+            continue
+        names = installer.install_path(spec.hosts[src].ip, spec.hosts[dst].ip, path,
+                                       prefix=f"g2probe{index}", priority=PROBE_PRIORITY, ip_protos=[1, 6])
+        try:
+            features = telemetry.measure(src, dst, path, link_util)
+        finally:
+            installer.remove(names)
+        if features["packet_loss_pct"] >= 100.0 and scenario.path_utilization(path) < CLASS_BANDS[-1][0]:
+            log.warning("Discarded %s: every ping lost on a path below %.0f %% load (measurement failure)",
+                        "-".join(path), 100 * CLASS_BANDS[-1][0])
+            continue
+        rows.append((src, dst, path, features, label))
+        pending[label] += 1
+    return rows
 
 
 def collect(args) -> str:
@@ -108,7 +134,7 @@ def collect(args) -> str:
             writer = csv.DictWriter(handle, fieldnames=META_COLUMNS + FEATURE_NAMES + LABEL_COLUMNS)
             if new_file:
                 writer.writeheader()
-            epoch = first_epoch
+            epoch, failures = first_epoch, 0
             while not done() and (args.max_epochs is None or epoch < first_epoch + args.max_epochs):
                 target = None
                 if args.balance and rng.random() < args.targeted:
@@ -116,17 +142,17 @@ def collect(args) -> str:
                 scenario = sample_scenario(spec.graph, rng.randrange(2 ** 31), args.path_hops, target)
                 generator.apply(scenario)
                 time.sleep(args.warmup)
-                link_util = telemetry.link_utilization()
-                for index, (src, dst, path) in enumerate(epoch_paths(spec, rng, candidates, args.extra_pairs)):
-                    label = scenario.path_class(path)
-                    if args.balance and counts[label] >= quota:
-                        continue
-                    names = installer.install_path(spec.hosts[src].ip, spec.hosts[dst].ip, path,
-                                                   prefix=f"g2probe{index}", priority=PROBE_PRIORITY, ip_protos=[1, 6])
-                    try:
-                        features = telemetry.measure(src, dst, path, link_util)
-                    finally:
-                        installer.remove(names)
+                try:
+                    measured = measure_epoch(spec, rng, candidates, args, scenario, counts, quota, installer, telemetry)
+                    failures = 0
+                except ControllerError as exc:
+                    failures += 1
+                    if failures >= 3:
+                        raise
+                    log.warning("Epoch %d skipped (%s); retrying in 30 s", epoch, exc)
+                    time.sleep(30)
+                    continue
+                for src, dst, path, features, label in measured:
                     writer.writerow({"epoch": epoch, "time": round(time.time(), 1), "src": src, "dst": dst,
                                      "path": "-".join(path), "bottleneck_load": round(scenario.path_utilization(path), 4),
                                      **{k: round(v, 4) for k, v in features.items()},
