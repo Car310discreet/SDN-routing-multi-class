@@ -104,18 +104,53 @@ def hosts_on(spec: TopologySpec, switch: str) -> list[str]:
     return sorted((h for h, info in spec.hosts.items() if info.switch == switch), key=lambda h: (len(h), h))
 
 
-def start_geant2(spec: TopologySpec, api, ping_all: bool = True):
-    """Start GEANT2 on Floodlight, wait for every switch, clear old static entries (needs root)."""
-    from telemetry_and_model import wait_for_switches
-    net = start_network(spec)
+IPV6_DEFAULT = "/proc/sys/net/ipv6/conf/default/disable_ipv6"
+
+
+def start_without_ipv6(spec: TopologySpec):
+    """
+    start_network() with IPv6 off on every switch and host interface.
+
+    With IPv6 on, the link-local traffic of the switch ports (in the root namespace) reaches Open vSwitch
+    with a packet mark. Open vSwitch then reports a pkt_mark field in PacketIn messages, which
+    Floodlight's OpenFlow library cannot parse (OFParseError ... OFOxmVer13: 82436). Floodlight drops
+    the switch connection and wipes its flow table; with many switches its routing state can stay
+    stale (whole switches unreachable). Measured on a 4-switch network: 22 parse errors in 45 s with
+    IPv6, none without.
+    """
+    with open(IPV6_DEFAULT) as handle:
+        previous = handle.read().strip()
+    with open(IPV6_DEFAULT, "w") as handle:      # only interfaces created while this is set
+        handle.write("1")
+    try:
+        net = start_network(spec)
+    finally:
+        with open(IPV6_DEFAULT, "w") as handle:
+            handle.write(previous)
+    for host in net.hosts:
+        host.cmd("sysctl -qw net.ipv6.conf.all.disable_ipv6=1")
+    return net
+
+
+def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0):
+    """Start GEANT2 on Floodlight, wait for every switch, clear old static entries, check connectivity
+    (needs root)."""
+    from telemetry_and_model import ControllerError, wait_for_switches
+    net = start_without_ipv6(spec)
     try:
         wait_for_switches(api, set(spec.switch_dpids.values()))
         api.clear_flows()            # static entries of earlier runs reappear on reused DPIDs
         api.set_routing_metric("hopcount")
         if ping_all:
             log.info("Testing connectivity (pingAll) so Floodlight learns every host")
-            net.pingAll()
-    except Exception:
+            loss = net.pingAll()
+            if loss > 0:
+                log.warning("pingAll lost %.1f %%; waiting %.0f s for the topology to settle", loss, settle_s)
+                time.sleep(settle_s)
+                loss = net.pingAll()
+            if loss > 0:
+                raise ControllerError(f"Hosts cannot reach each other through Floodlight ({loss:.1f} % ping loss)")
+    except BaseException:
         stop_network(net)
         raise
     return net
