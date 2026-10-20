@@ -24,6 +24,9 @@ and scenario_<k>/scenario.json (link loads).
     ./start_floodlight.sh                                          # separate terminal
     sudo .venv/bin/python geant2/run_experiment.py --scenarios 3
     .venv/bin/python geant2/evaluate.py results/geant2
+
+An interrupted run continues in its own directory; scenario k is redone in full:
+    sudo .venv/bin/python geant2/run_experiment.py --scenarios 3 --resume results/geant2/<run> --first-scenario k
 """
 from __future__ import annotations
 
@@ -105,10 +108,14 @@ def run(args) -> str:
         models["geant2_ml"] = CongestionClassifier.load(args.model)
     spec = build_geant2(args.hosts_per_switch)
     candidates = candidate_paths(spec)
-    run_dir = os.path.join(args.out, f"geant2_{datetime.now():%Y%m%d_%H%M%S}")
+    run_dir = args.resume or os.path.join(args.out, f"geant2_{datetime.now():%Y%m%d_%H%M%S}")
     os.makedirs(run_dir, exist_ok=True)
     metadata = {"topology": "geant2", "sender": SENDER, "receiver": RECEIVER, "candidates": candidates,
                 "geant2_model": getattr(models.get("geant2_ml"), "name", None), "scenarios": {}}
+    if args.resume and os.path.exists(os.path.join(run_dir, "run.json")):
+        with open(os.path.join(run_dir, "run.json")) as handle:
+            metadata["scenarios"] = {int(k): v for k, v in json.load(handle).get("scenarios", {}).items()
+                                     if int(k) < args.first_scenario}
 
     net = generator = None
     installed: list[str] = []
@@ -118,7 +125,7 @@ def run(args) -> str:
         generator = TrafficGenerator(net, spec, installer)
         generator.start()
         evaluator = Evaluator(net, spec, SENDER, RECEIVER, args.video)
-        for k in range(args.scenarios):
+        for k in range(args.first_scenario, args.scenarios):
             scenario = sample_scenario(spec.graph, args.seed + k, args.path_hops)
             generator.apply(scenario)
             time.sleep(args.warmup)
@@ -173,6 +180,10 @@ def main():
     parser.add_argument("--hosts-per-switch", type=int, default=1)
     parser.add_argument("--controller-url", default="http://127.0.0.1:8080")
     parser.add_argument("--out", default=os.path.join(PROJECT_DIR, "results", "geant2"))
+    parser.add_argument("--resume", metavar="RUN_DIR",
+                        help="continue an interrupted run in RUN_DIR (with --first-scenario)")
+    parser.add_argument("--first-scenario", type=int, default=0,
+                        help="first scenario to run; earlier ones are kept from --resume")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     logging.getLogger("urllib3").setLevel(logging.WARNING)
