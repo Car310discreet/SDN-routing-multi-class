@@ -1,0 +1,286 @@
+nohup: ignoring input
+2026-10-21 13:33:30,242 INFO collect_dataset: fattree: target 1000 rows (balanced); already have {}
+2026-10-21 13:33:42,195 INFO geant2_topo: Testing connectivity (pingAll) so Floodlight learns every host
+*** Ping: testing ping reachability
+h0 -> h1 h2 h3 h4 h5 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h1 -> h0 h2 h3 h4 h5 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h2 -> h0 h1 h3 h4 h5 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h3 -> h0 h1 h2 h4 h5 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h4 -> h0 h1 h2 h3 h5 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h5 -> h0 h1 h2 h3 h4 h6 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h6 -> h0 h1 h2 h3 h4 h5 h7 h8 X h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h7 -> h0 h1 h2 h3 h4 h5 h6 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h8 -> h0 h1 h2 h3 h4 h5 h6 h7 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h9 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h10 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h11 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h12 h13 h14 h15 h16 h17 h18 h19 
+h12 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h13 h14 h15 h16 h17 h18 h19 
+h13 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h14 h15 h16 h17 h18 h19 
+h14 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h15 h16 h17 h18 h19 
+h15 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h16 h17 h18 h19 
+h16 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h17 h18 h19 
+h17 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h18 h19 
+h18 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h19 
+h19 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 
+*** Results: 1% dropped (373/380 received)
+h12 -> h18 
+h18 -> h12 
+*** Results: 0% dropped (2/2 received)
+2026-10-21 13:35:15,171 WARNING geant2_topo: pingAll lost 1.8 % (Sender <-> Receiver 0 %); waiting 30 s for the topology to settle
+*** Ping: testing ping reachability
+h0 -> h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h1 -> h0 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h2 -> h0 h1 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h3 -> h0 h1 h2 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h4 -> h0 h1 h2 h3 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h5 -> h0 h1 h2 h3 h4 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h6 -> h0 h1 h2 h3 h4 h5 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h7 -> h0 h1 h2 h3 h4 h5 h6 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h8 -> h0 h1 h2 h3 h4 h5 h6 h7 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h9 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h10 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h11 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h12 h13 h14 h15 h16 h17 h18 h19 
+h12 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h13 h14 h15 h16 h17 h18 h19 
+h13 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h14 h15 h16 h17 h18 h19 
+h14 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h15 h16 h17 h18 h19 
+h15 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h16 h17 h18 h19 
+h16 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h17 h18 h19 
+h17 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h18 h19 
+h18 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h19 
+h19 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 
+*** Results: 0% dropped (380/380 received)
+h12 -> h18 
+h18 -> h12 
+*** Results: 0% dropped (2/2 received)
+2026-10-21 13:36:07,568 INFO traffic_gen: Pinned 64 background flows on 32 links
+2026-10-21 13:36:07,584 INFO traffic_gen: Scenario 1806341205: links per class Extremely Low 23, Low 6, High 3, Extremely High 0
+2026-10-21 13:37:58,174 INFO collect_dataset: Epoch 0 done; rows per class: Extremely Low 1, Low 6, High 1, Extremely High 0
+2026-10-21 13:37:59,204 INFO traffic_gen: Scenario 938204377: links per class Extremely Low 22, Low 9, High 1, Extremely High 0
+2026-10-21 13:39:47,693 INFO collect_dataset: Epoch 1 done; rows per class: Extremely Low 2, Low 12, High 2, Extremely High 0
+2026-10-21 13:39:48,713 INFO traffic_gen: Scenario 1418186270: links per class Extremely Low 19, Low 8, High 4, Extremely High 1
+2026-10-21 13:41:37,018 INFO collect_dataset: Epoch 2 done; rows per class: Extremely Low 3, Low 17, High 4, Extremely High 0
+2026-10-21 13:41:38,055 INFO traffic_gen: Scenario 1118805955: links per class Extremely Low 21, Low 1, High 0, Extremely High 10
+2026-10-21 13:47:00,796 INFO collect_dataset: Epoch 3 done; rows per class: Extremely Low 3, Low 17, High 4, Extremely High 8
+2026-10-21 13:47:01,845 INFO traffic_gen: Scenario 1430804514: links per class Extremely Low 19, Low 6, High 3, Extremely High 4
+2026-10-21 13:48:49,209 INFO collect_dataset: Epoch 4 done; rows per class: Extremely Low 3, Low 18, High 7, Extremely High 12
+2026-10-21 13:48:50,240 INFO traffic_gen: Scenario 1924014660: links per class Extremely Low 22, Low 5, High 2, Extremely High 3
+2026-10-21 13:50:39,855 INFO collect_dataset: Epoch 5 done; rows per class: Extremely Low 5, Low 19, High 10, Extremely High 14
+2026-10-21 13:50:40,884 INFO traffic_gen: Scenario 872745308: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 13:52:27,269 INFO collect_dataset: Epoch 6 done; rows per class: Extremely Low 13, Low 19, High 10, Extremely High 14
+2026-10-21 13:52:28,300 INFO traffic_gen: Scenario 801997237: links per class Extremely Low 18, Low 3, High 11, Extremely High 0
+2026-10-21 13:54:18,584 INFO collect_dataset: Epoch 7 done; rows per class: Extremely Low 13, Low 20, High 17, Extremely High 14
+2026-10-21 13:54:19,612 INFO traffic_gen: Scenario 1680603714: links per class Extremely Low 21, Low 3, High 4, Extremely High 4
+2026-10-21 13:56:54,882 INFO collect_dataset: Epoch 8 done; rows per class: Extremely Low 14, Low 21, High 19, Extremely High 18
+2026-10-21 13:56:55,917 INFO traffic_gen: Scenario 1534881946: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 13:58:43,114 INFO collect_dataset: Epoch 9 done; rows per class: Extremely Low 22, Low 21, High 19, Extremely High 18
+2026-10-21 13:58:44,142 INFO traffic_gen: Scenario 1164099199: links per class Extremely Low 19, Low 3, High 0, Extremely High 10
+2026-10-21 14:00:33,134 INFO collect_dataset: Epoch 10 done; rows per class: Extremely Low 25, Low 23, High 19, Extremely High 21
+2026-10-21 14:00:34,161 INFO traffic_gen: Scenario 628604922: links per class Extremely Low 18, Low 3, High 11, Extremely High 0
+2026-10-21 14:02:21,117 INFO collect_dataset: Epoch 11 done; rows per class: Extremely Low 25, Low 23, High 27, Extremely High 21
+2026-10-21 14:02:22,147 INFO traffic_gen: Scenario 393126321: links per class Extremely Low 15, Low 3, High 3, Extremely High 11
+2026-10-21 14:05:27,904 INFO collect_dataset: Epoch 12 done; rows per class: Extremely Low 25, Low 24, High 27, Extremely High 28
+2026-10-21 14:05:28,935 INFO traffic_gen: Scenario 262357606: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 14:07:15,283 INFO collect_dataset: Epoch 13 done; rows per class: Extremely Low 26, Low 31, High 27, Extremely High 28
+2026-10-21 14:07:16,311 INFO traffic_gen: Scenario 1504501144: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 14:09:02,829 INFO collect_dataset: Epoch 14 done; rows per class: Extremely Low 34, Low 31, High 27, Extremely High 28
+2026-10-21 14:09:03,859 INFO traffic_gen: Scenario 1539983294: links per class Extremely Low 16, Low 9, High 7, Extremely High 0
+2026-10-21 14:10:52,201 INFO collect_dataset: Epoch 15 done; rows per class: Extremely Low 34, Low 33, High 33, Extremely High 28
+2026-10-21 14:10:53,224 INFO traffic_gen: Scenario 1470221169: links per class Extremely Low 23, Low 5, High 3, Extremely High 1
+2026-10-21 14:12:41,324 INFO collect_dataset: Epoch 16 done; rows per class: Extremely Low 36, Low 35, High 35, Extremely High 30
+2026-10-21 14:12:42,351 INFO traffic_gen: Scenario 1337650368: links per class Extremely Low 25, Low 3, High 4, Extremely High 0
+2026-10-21 14:14:28,318 INFO collect_dataset: Epoch 17 done; rows per class: Extremely Low 42, Low 36, High 36, Extremely High 30
+2026-10-21 14:14:29,343 INFO traffic_gen: Scenario 196264944: links per class Extremely Low 14, Low 7, High 1, Extremely High 10
+2026-10-21 14:18:15,416 INFO collect_dataset: Epoch 18 done; rows per class: Extremely Low 42, Low 36, High 37, Extremely High 37
+2026-10-21 14:18:16,453 INFO traffic_gen: Scenario 568414356: links per class Extremely Low 15, Low 17, High 0, Extremely High 0
+2026-10-21 14:20:04,413 INFO collect_dataset: Epoch 19 done; rows per class: Extremely Low 42, Low 44, High 37, Extremely High 37
+2026-10-21 14:20:05,440 INFO traffic_gen: Scenario 958197830: links per class Extremely Low 19, Low 3, High 10, Extremely High 0
+2026-10-21 14:21:53,761 INFO collect_dataset: Epoch 20 done; rows per class: Extremely Low 42, Low 45, High 44, Extremely High 37
+2026-10-21 14:21:54,785 INFO traffic_gen: Scenario 274389611: links per class Extremely Low 18, Low 4, High 2, Extremely High 8
+2026-10-21 14:26:50,299 INFO collect_dataset: Epoch 21 done; rows per class: Extremely Low 44, Low 45, High 44, Extremely High 43
+2026-10-21 14:26:51,332 INFO traffic_gen: Scenario 2005286885: links per class Extremely Low 16, Low 3, High 3, Extremely High 10
+2026-10-21 14:29:40,607 INFO collect_dataset: Epoch 22 done; rows per class: Extremely Low 44, Low 45, High 45, Extremely High 50
+2026-10-21 14:29:41,642 INFO traffic_gen: Scenario 1793084754: links per class Extremely Low 20, Low 9, High 3, Extremely High 0
+2026-10-21 14:31:29,985 INFO collect_dataset: Epoch 23 done; rows per class: Extremely Low 45, Low 49, High 48, Extremely High 50
+2026-10-21 14:31:31,015 INFO traffic_gen: Scenario 852621339: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 14:33:17,142 INFO collect_dataset: Epoch 24 done; rows per class: Extremely Low 53, Low 49, High 48, Extremely High 50
+2026-10-21 14:33:18,173 INFO traffic_gen: Scenario 497268706: links per class Extremely Low 22, Low 6, High 3, Extremely High 1
+2026-10-21 14:36:48,122 INFO collect_dataset: Epoch 25 done; rows per class: Extremely Low 53, Low 53, High 48, Extremely High 54
+2026-10-21 14:36:49,164 INFO traffic_gen: Scenario 883628285: links per class Extremely Low 25, Low 2, High 5, Extremely High 0
+2026-10-21 14:38:35,767 INFO collect_dataset: Epoch 26 done; rows per class: Extremely Low 56, Low 55, High 51, Extremely High 54
+2026-10-21 14:38:36,790 INFO traffic_gen: Scenario 1599657397: links per class Extremely Low 19, Low 5, High 8, Extremely High 0
+2026-10-21 14:40:24,901 INFO collect_dataset: Epoch 27 done; rows per class: Extremely Low 57, Low 56, High 57, Extremely High 54
+2026-10-21 14:40:25,936 INFO traffic_gen: Scenario 1577118317: links per class Extremely Low 20, Low 4, High 3, Extremely High 5
+2026-10-21 14:43:21,673 INFO collect_dataset: Epoch 28 done; rows per class: Extremely Low 57, Low 58, High 57, Extremely High 60
+2026-10-21 14:43:22,710 INFO traffic_gen: Scenario 1695618646: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 14:45:09,162 INFO collect_dataset: Epoch 29 done; rows per class: Extremely Low 65, Low 58, High 57, Extremely High 60
+2026-10-21 14:45:10,187 INFO traffic_gen: Scenario 304353766: links per class Extremely Low 23, Low 2, High 4, Extremely High 3
+2026-10-21 14:47:32,112 INFO collect_dataset: Epoch 30 done; rows per class: Extremely Low 66, Low 58, High 60, Extremely High 64
+2026-10-21 14:47:33,153 INFO traffic_gen: Scenario 1475972382: links per class Extremely Low 19, Low 13, High 0, Extremely High 0
+2026-10-21 14:49:19,886 INFO collect_dataset: Epoch 31 done; rows per class: Extremely Low 67, Low 65, High 60, Extremely High 64
+2026-10-21 14:49:20,918 INFO traffic_gen: Scenario 1613066649: links per class Extremely Low 23, Low 4, High 2, Extremely High 3
+2026-10-21 14:53:55,208 INFO collect_dataset: Epoch 32 done; rows per class: Extremely Low 69, Low 65, High 61, Extremely High 69
+2026-10-21 14:53:56,230 INFO traffic_gen: Scenario 1244770883: links per class Extremely Low 18, Low 6, High 8, Extremely High 0
+2026-10-21 14:55:43,657 INFO collect_dataset: Epoch 33 done; rows per class: Extremely Low 70, Low 66, High 67, Extremely High 69
+2026-10-21 14:55:44,690 INFO traffic_gen: Scenario 715460430: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 14:57:30,915 INFO collect_dataset: Epoch 34 done; rows per class: Extremely Low 71, Low 73, High 67, Extremely High 69
+2026-10-21 14:57:31,942 INFO traffic_gen: Scenario 1709197715: links per class Extremely Low 19, Low 2, High 11, Extremely High 0
+2026-10-21 14:59:20,049 INFO collect_dataset: Epoch 35 done; rows per class: Extremely Low 72, Low 74, High 73, Extremely High 69
+2026-10-21 14:59:21,073 INFO traffic_gen: Scenario 649976180: links per class Extremely Low 12, Low 4, High 3, Extremely High 13
+2026-10-21 15:04:25,397 INFO collect_dataset: Epoch 36 done; rows per class: Extremely Low 72, Low 74, High 73, Extremely High 77
+2026-10-21 15:04:26,416 INFO traffic_gen: Scenario 1384956481: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 15:06:10,718 INFO collect_dataset: Epoch 37 done; rows per class: Extremely Low 80, Low 74, High 73, Extremely High 77
+2026-10-21 15:06:11,742 INFO traffic_gen: Scenario 637230909: links per class Extremely Low 14, Low 6, High 12, Extremely High 0
+2026-10-21 15:07:58,419 INFO collect_dataset: Epoch 38 done; rows per class: Extremely Low 80, Low 75, High 80, Extremely High 77
+2026-10-21 15:07:59,447 INFO traffic_gen: Scenario 169289719: links per class Extremely Low 26, Low 6, High 0, Extremely High 0
+2026-10-21 15:09:45,907 INFO collect_dataset: Epoch 39 done; rows per class: Extremely Low 84, Low 79, High 80, Extremely High 77
+2026-10-21 15:09:46,942 INFO traffic_gen: Scenario 1978842144: links per class Extremely Low 23, Low 4, High 3, Extremely High 2
+2026-10-21 15:13:31,363 INFO collect_dataset: Epoch 40 done; rows per class: Extremely Low 86, Low 81, High 80, Extremely High 81
+2026-10-21 15:13:32,394 INFO traffic_gen: Scenario 885213514: links per class Extremely Low 24, Low 2, High 2, Extremely High 4
+2026-10-21 15:15:20,685 INFO collect_dataset: Epoch 41 done; rows per class: Extremely Low 89, Low 82, High 83, Extremely High 82
+2026-10-21 15:15:21,709 INFO traffic_gen: Scenario 87968578: links per class Extremely Low 19, Low 13, High 0, Extremely High 0
+2026-10-21 15:17:09,819 INFO collect_dataset: Epoch 42 done; rows per class: Extremely Low 89, Low 90, High 83, Extremely High 82
+2026-10-21 15:17:10,856 INFO traffic_gen: Scenario 1125313762: links per class Extremely Low 19, Low 3, High 3, Extremely High 7
+2026-10-21 15:19:32,157 INFO collect_dataset: Epoch 43 done; rows per class: Extremely Low 91, Low 92, High 84, Extremely High 85
+2026-10-21 15:19:33,180 INFO traffic_gen: Scenario 1434624957: links per class Extremely Low 23, Low 3, High 6, Extremely High 0
+2026-10-21 15:21:20,452 INFO collect_dataset: Epoch 44 done; rows per class: Extremely Low 91, Low 94, High 90, Extremely High 85
+2026-10-21 15:21:21,478 INFO traffic_gen: Scenario 1515143493: links per class Extremely Low 23, Low 5, High 2, Extremely High 2
+2026-10-21 15:23:42,397 INFO collect_dataset: Epoch 45 done; rows per class: Extremely Low 93, Low 97, High 92, Extremely High 86
+2026-10-21 15:23:43,415 INFO traffic_gen: Scenario 86878931: links per class Extremely Low 21, Low 4, High 5, Extremely High 2
+2026-10-21 15:25:32,355 INFO collect_dataset: Epoch 46 done; rows per class: Extremely Low 95, Low 99, High 95, Extremely High 87
+2026-10-21 15:25:33,389 INFO traffic_gen: Scenario 837405312: links per class Extremely Low 20, Low 2, High 0, Extremely High 10
+2026-10-21 15:30:16,766 INFO collect_dataset: Epoch 47 done; rows per class: Extremely Low 96, Low 99, High 95, Extremely High 94
+2026-10-21 15:30:17,787 INFO traffic_gen: Scenario 1272969853: links per class Extremely Low 16, Low 3, High 1, Extremely High 12
+2026-10-21 15:35:19,520 INFO collect_dataset: Epoch 48 done; rows per class: Extremely Low 96, Low 99, High 95, Extremely High 102
+2026-10-21 15:35:20,553 INFO traffic_gen: Scenario 818094883: links per class Extremely Low 21, Low 3, High 8, Extremely High 0
+2026-10-21 15:37:06,948 INFO collect_dataset: Epoch 49 done; rows per class: Extremely Low 97, Low 101, High 100, Extremely High 102
+2026-10-21 15:37:07,973 INFO traffic_gen: Scenario 927624393: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 15:38:54,039 INFO collect_dataset: Epoch 50 done; rows per class: Extremely Low 105, Low 101, High 100, Extremely High 102
+2026-10-21 15:38:55,064 INFO traffic_gen: Scenario 1812718940: links per class Extremely Low 24, Low 5, High 1, Extremely High 2
+2026-10-21 15:43:07,606 INFO collect_dataset: Epoch 51 done; rows per class: Extremely Low 107, Low 102, High 100, Extremely High 107
+2026-10-21 15:43:08,626 INFO traffic_gen: Scenario 1851501600: links per class Extremely Low 23, Low 5, High 3, Extremely High 1
+2026-10-21 15:44:55,104 INFO collect_dataset: Epoch 52 done; rows per class: Extremely Low 108, Low 103, High 103, Extremely High 110
+2026-10-21 15:44:56,123 INFO traffic_gen: Scenario 126175447: links per class Extremely Low 23, Low 9, High 0, Extremely High 0
+2026-10-21 15:46:43,498 INFO collect_dataset: Epoch 53 done; rows per class: Extremely Low 113, Low 106, High 103, Extremely High 110
+2026-10-21 15:46:44,529 INFO traffic_gen: Scenario 893258886: links per class Extremely Low 23, Low 2, High 6, Extremely High 1
+2026-10-21 15:48:32,779 INFO collect_dataset: Epoch 54 done; rows per class: Extremely Low 114, Low 107, High 109, Extremely High 110
+2026-10-21 15:48:33,804 INFO traffic_gen: Scenario 803123253: links per class Extremely Low 21, Low 4, High 4, Extremely High 3
+2026-10-21 15:50:21,559 INFO collect_dataset: Epoch 55 done; rows per class: Extremely Low 117, Low 107, High 112, Extremely High 112
+2026-10-21 15:50:22,591 INFO traffic_gen: Scenario 2033110389: links per class Extremely Low 25, Low 7, High 0, Extremely High 0
+2026-10-21 15:52:11,109 INFO collect_dataset: Epoch 56 done; rows per class: Extremely Low 122, Low 110, High 112, Extremely High 112
+2026-10-21 15:52:12,136 INFO traffic_gen: Scenario 671746030: links per class Extremely Low 23, Low 9, High 0, Extremely High 0
+2026-10-21 15:53:59,703 INFO collect_dataset: Epoch 57 done; rows per class: Extremely Low 123, Low 117, High 112, Extremely High 112
+2026-10-21 15:54:00,728 INFO traffic_gen: Scenario 1802964465: links per class Extremely Low 18, Low 2, High 12, Extremely High 0
+2026-10-21 15:55:49,578 INFO collect_dataset: Epoch 58 done; rows per class: Extremely Low 123, Low 117, High 120, Extremely High 112
+2026-10-21 15:55:50,600 INFO traffic_gen: Scenario 1789924707: links per class Extremely Low 19, Low 3, High 1, Extremely High 9
+2026-10-21 15:59:15,172 INFO collect_dataset: Epoch 59 done; rows per class: Extremely Low 124, Low 117, High 120, Extremely High 119
+2026-10-21 15:59:16,203 INFO traffic_gen: Scenario 248494427: links per class Extremely Low 23, Low 9, High 0, Extremely High 0
+2026-10-21 16:01:01,874 INFO collect_dataset: Epoch 60 done; rows per class: Extremely Low 129, Low 120, High 120, Extremely High 119
+2026-10-21 16:01:02,904 INFO traffic_gen: Scenario 2022446622: links per class Extremely Low 15, Low 4, High 1, Extremely High 12
+2026-10-21 16:05:13,278 INFO collect_dataset: Epoch 61 done; rows per class: Extremely Low 129, Low 122, High 120, Extremely High 125
+2026-10-21 16:05:14,313 INFO traffic_gen: Scenario 796203998: links per class Extremely Low 21, Low 8, High 2, Extremely High 1
+2026-10-21 16:07:00,879 INFO collect_dataset: Epoch 62 done; rows per class: Extremely Low 132, Low 124, High 120, Extremely High 128
+2026-10-21 16:07:01,904 INFO traffic_gen: Scenario 371512088: links per class Extremely Low 24, Low 3, High 5, Extremely High 0
+2026-10-21 16:08:48,507 INFO collect_dataset: Epoch 63 done; rows per class: Extremely Low 134, Low 127, High 123, Extremely High 128
+2026-10-21 16:08:49,535 INFO traffic_gen: Scenario 1293467907: links per class Extremely Low 17, Low 6, High 9, Extremely High 0
+2026-10-21 16:10:38,686 INFO collect_dataset: Epoch 64 done; rows per class: Extremely Low 134, Low 129, High 129, Extremely High 128
+2026-10-21 16:10:39,719 INFO traffic_gen: Scenario 92854557: links per class Extremely Low 9, Low 6, High 4, Extremely High 13
+2026-10-21 16:16:15,590 INFO collect_dataset: Epoch 65 done; rows per class: Extremely Low 134, Low 129, High 129, Extremely High 136
+2026-10-21 16:16:16,617 INFO traffic_gen: Scenario 1519654072: links per class Extremely Low 25, Low 2, High 4, Extremely High 1
+2026-10-21 16:18:01,464 INFO collect_dataset: Epoch 66 done; rows per class: Extremely Low 137, Low 129, High 134, Extremely High 136
+2026-10-21 16:18:02,495 INFO traffic_gen: Scenario 1069648896: links per class Extremely Low 25, Low 7, High 0, Extremely High 0
+2026-10-21 16:19:49,561 INFO collect_dataset: Epoch 67 done; rows per class: Extremely Low 141, Low 133, High 134, Extremely High 136
+2026-10-21 16:19:50,583 INFO traffic_gen: Scenario 452287526: links per class Extremely Low 24, Low 8, High 0, Extremely High 0
+2026-10-21 16:21:36,736 INFO collect_dataset: Epoch 68 done; rows per class: Extremely Low 142, Low 140, High 134, Extremely High 136
+2026-10-21 16:21:37,760 INFO traffic_gen: Scenario 591901263: links per class Extremely Low 16, Low 3, High 13, Extremely High 0
+2026-10-21 16:23:26,313 INFO collect_dataset: Epoch 69 done; rows per class: Extremely Low 142, Low 140, High 142, Extremely High 136
+2026-10-21 16:23:27,339 INFO traffic_gen: Scenario 1520666922: links per class Extremely Low 16, Low 5, High 3, Extremely High 8
+2026-10-21 16:27:27,691 INFO collect_dataset: Epoch 70 done; rows per class: Extremely Low 142, Low 141, High 142, Extremely High 143
+2026-10-21 16:27:28,715 INFO traffic_gen: Scenario 613370405: links per class Extremely Low 23, Low 9, High 0, Extremely High 0
+2026-10-21 16:29:15,046 INFO collect_dataset: Epoch 71 done; rows per class: Extremely Low 142, Low 149, High 142, Extremely High 143
+2026-10-21 16:29:16,078 INFO traffic_gen: Scenario 285429891: links per class Extremely Low 21, Low 5, High 4, Extremely High 2
+2026-10-21 16:32:33,741 INFO collect_dataset: Epoch 72 done; rows per class: Extremely Low 143, Low 149, High 146, Extremely High 146
+2026-10-21 16:32:34,772 INFO traffic_gen: Scenario 1256391411: links per class Extremely Low 26, Low 3, High 3, Extremely High 0
+2026-10-21 16:34:21,441 INFO collect_dataset: Epoch 73 done; rows per class: Extremely Low 147, Low 150, High 149, Extremely High 146
+2026-10-21 16:34:22,462 INFO traffic_gen: Scenario 1420326443: links per class Extremely Low 17, Low 0, High 4, Extremely High 11
+2026-10-21 16:37:40,364 INFO collect_dataset: Epoch 74 done; rows per class: Extremely Low 148, Low 150, High 150, Extremely High 152
+2026-10-21 16:37:41,408 INFO traffic_gen: Scenario 1907499492: links per class Extremely Low 19, Low 8, High 4, Extremely High 1
+2026-10-21 16:39:28,450 INFO collect_dataset: Epoch 75 done; rows per class: Extremely Low 148, Low 152, High 156, Extremely High 152
+2026-10-21 16:39:29,470 INFO traffic_gen: Scenario 1886659028: links per class Extremely Low 19, Low 5, High 7, Extremely High 1
+2026-10-21 16:41:17,328 INFO collect_dataset: Epoch 76 done; rows per class: Extremely Low 149, Low 152, High 163, Extremely High 152
+2026-10-21 16:41:18,371 INFO traffic_gen: Scenario 744635075: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 16:43:04,440 INFO collect_dataset: Epoch 77 done; rows per class: Extremely Low 157, Low 152, High 163, Extremely High 152
+2026-10-21 16:43:05,474 INFO traffic_gen: Scenario 231670619: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 16:44:53,645 INFO collect_dataset: Epoch 78 done; rows per class: Extremely Low 157, Low 160, High 163, Extremely High 152
+2026-10-21 16:44:54,674 INFO traffic_gen: Scenario 225714774: links per class Extremely Low 17, Low 2, High 2, Extremely High 11
+2026-10-21 16:48:18,037 INFO collect_dataset: Epoch 79 done; rows per class: Extremely Low 158, Low 160, High 165, Extremely High 157
+2026-10-21 16:48:19,064 INFO traffic_gen: Scenario 1703016756: links per class Extremely Low 13, Low 7, High 3, Extremely High 9
+2026-10-21 16:51:12,787 INFO collect_dataset: Epoch 80 done; rows per class: Extremely Low 158, Low 163, High 165, Extremely High 162
+2026-10-21 16:51:13,815 INFO traffic_gen: Scenario 1957407228: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 16:53:00,833 INFO collect_dataset: Epoch 81 done; rows per class: Extremely Low 166, Low 163, High 165, Extremely High 162
+2026-10-21 16:53:01,867 INFO traffic_gen: Scenario 865958133: links per class Extremely Low 18, Low 3, High 2, Extremely High 9
+2026-10-21 16:56:51,212 INFO collect_dataset: Epoch 82 done; rows per class: Extremely Low 166, Low 164, High 165, Extremely High 169
+2026-10-21 16:56:52,247 INFO traffic_gen: Scenario 1030628967: links per class Extremely Low 24, Low 2, High 6, Extremely High 0
+2026-10-21 16:58:39,323 INFO collect_dataset: Epoch 83 done; rows per class: Extremely Low 170, Low 165, High 168, Extremely High 169
+2026-10-21 16:58:40,348 INFO traffic_gen: Scenario 1770042721: links per class Extremely Low 18, Low 14, High 0, Extremely High 0
+2026-10-21 17:00:25,925 INFO collect_dataset: Epoch 84 done; rows per class: Extremely Low 172, Low 171, High 168, Extremely High 169
+2026-10-21 17:00:26,958 INFO traffic_gen: Scenario 916831750: links per class Extremely Low 16, Low 6, High 10, Extremely High 0
+2026-10-21 17:02:14,036 INFO collect_dataset: Epoch 85 done; rows per class: Extremely Low 172, Low 174, High 173, Extremely High 169
+2026-10-21 17:02:15,076 INFO traffic_gen: Scenario 550122923: links per class Extremely Low 21, Low 1, High 1, Extremely High 9
+2026-10-21 17:06:48,337 INFO collect_dataset: Epoch 86 done; rows per class: Extremely Low 174, Low 174, High 173, Extremely High 175
+2026-10-21 17:06:49,367 INFO traffic_gen: Scenario 1274064467: links per class Extremely Low 18, Low 5, High 3, Extremely High 6
+2026-10-21 17:09:52,588 INFO collect_dataset: Epoch 87 done; rows per class: Extremely Low 174, Low 176, High 175, Extremely High 179
+2026-10-21 17:09:53,619 INFO traffic_gen: Scenario 424775559: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 17:11:39,183 INFO collect_dataset: Epoch 88 done; rows per class: Extremely Low 182, Low 176, High 175, Extremely High 179
+2026-10-21 17:11:40,209 INFO traffic_gen: Scenario 213762068: links per class Extremely Low 20, Low 6, High 6, Extremely High 0
+2026-10-21 17:13:28,024 INFO collect_dataset: Epoch 89 done; rows per class: Extremely Low 182, Low 179, High 180, Extremely High 179
+2026-10-21 17:13:29,051 INFO traffic_gen: Scenario 951584273: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 17:15:18,118 INFO collect_dataset: Epoch 90 done; rows per class: Extremely Low 184, Low 185, High 180, Extremely High 179
+2026-10-21 17:15:19,151 INFO traffic_gen: Scenario 736081703: links per class Extremely Low 17, Low 4, High 2, Extremely High 9
+2026-10-21 17:19:52,233 INFO collect_dataset: Epoch 91 done; rows per class: Extremely Low 184, Low 185, High 181, Extremely High 186
+2026-10-21 17:19:53,251 INFO traffic_gen: Scenario 666764161: links per class Extremely Low 24, Low 3, High 3, Extremely High 2
+2026-10-21 17:21:40,152 INFO collect_dataset: Epoch 92 done; rows per class: Extremely Low 187, Low 186, High 182, Extremely High 189
+2026-10-21 17:21:41,177 INFO traffic_gen: Scenario 567488036: links per class Extremely Low 19, Low 2, High 11, Extremely High 0
+2026-10-21 17:23:30,076 INFO collect_dataset: Epoch 93 done; rows per class: Extremely Low 188, Low 186, High 189, Extremely High 189
+2026-10-21 17:23:31,111 INFO traffic_gen: Scenario 463916129: links per class Extremely Low 20, Low 1, High 4, Extremely High 7
+2026-10-21 17:28:29,963 INFO collect_dataset: Epoch 94 done; rows per class: Extremely Low 188, Low 187, High 190, Extremely High 195
+2026-10-21 17:28:31,005 INFO traffic_gen: Scenario 700239593: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 17:30:18,669 INFO collect_dataset: Epoch 95 done; rows per class: Extremely Low 188, Low 195, High 190, Extremely High 195
+2026-10-21 17:30:19,697 INFO traffic_gen: Scenario 820624919: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 17:32:06,157 INFO collect_dataset: Epoch 96 done; rows per class: Extremely Low 196, Low 195, High 190, Extremely High 195
+2026-10-21 17:32:07,196 INFO traffic_gen: Scenario 1894918522: links per class Extremely Low 20, Low 1, High 11, Extremely High 0
+2026-10-21 17:33:56,179 INFO collect_dataset: Epoch 97 done; rows per class: Extremely Low 196, Low 195, High 198, Extremely High 195
+2026-10-21 17:33:57,202 INFO traffic_gen: Scenario 649468678: links per class Extremely Low 24, Low 8, High 0, Extremely High 0
+2026-10-21 17:35:44,039 INFO collect_dataset: Epoch 98 done; rows per class: Extremely Low 199, Low 200, High 198, Extremely High 195
+2026-10-21 17:35:45,058 INFO traffic_gen: Scenario 1403027878: links per class Extremely Low 24, Low 3, High 3, Extremely High 2
+2026-10-21 17:37:32,597 INFO collect_dataset: Epoch 99 done; rows per class: Extremely Low 200, Low 201, High 204, Extremely High 195
+2026-10-21 17:37:33,636 INFO traffic_gen: Scenario 1537749212: links per class Extremely Low 16, Low 2, High 2, Extremely High 12
+2026-10-21 17:41:16,993 INFO collect_dataset: Epoch 100 done; rows per class: Extremely Low 200, Low 201, High 204, Extremely High 203
+2026-10-21 17:41:18,023 INFO traffic_gen: Scenario 1987065909: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 17:43:03,030 INFO collect_dataset: Epoch 101 done; rows per class: Extremely Low 208, Low 201, High 204, Extremely High 203
+2026-10-21 17:43:04,068 INFO traffic_gen: Scenario 636376235: links per class Extremely Low 27, Low 5, High 0, Extremely High 0
+2026-10-21 17:44:50,464 INFO collect_dataset: Epoch 102 done; rows per class: Extremely Low 210, Low 207, High 204, Extremely High 203
+2026-10-21 17:44:51,499 INFO traffic_gen: Scenario 337106169: links per class Extremely Low 15, Low 6, High 2, Extremely High 9
+2026-10-21 17:47:18,133 INFO collect_dataset: Epoch 103 done; rows per class: Extremely Low 210, Low 207, High 204, Extremely High 211
+2026-10-21 17:47:19,169 INFO traffic_gen: Scenario 1461363958: links per class Extremely Low 14, Low 2, High 16, Extremely High 0
+2026-10-21 17:49:06,005 INFO collect_dataset: Epoch 104 done; rows per class: Extremely Low 211, Low 207, High 211, Extremely High 211
+2026-10-21 17:49:07,032 INFO traffic_gen: Scenario 1528190125: links per class Extremely Low 20, Low 12, High 0, Extremely High 0
+2026-10-21 17:50:54,098 INFO collect_dataset: Epoch 105 done; rows per class: Extremely Low 214, Low 212, High 211, Extremely High 211
+2026-10-21 17:50:55,123 INFO traffic_gen: Scenario 1237928613: links per class Extremely Low 16, Low 3, High 13, Extremely High 0
+2026-10-21 17:52:44,358 INFO collect_dataset: Epoch 106 done; rows per class: Extremely Low 214, Low 212, High 219, Extremely High 211
+2026-10-21 17:52:45,399 INFO traffic_gen: Scenario 2130325423: links per class Extremely Low 20, Low 3, High 1, Extremely High 8
+2026-10-21 17:56:27,664 INFO collect_dataset: Epoch 107 done; rows per class: Extremely Low 216, Low 213, High 219, Extremely High 216
+2026-10-21 17:56:28,693 INFO traffic_gen: Scenario 1461493112: links per class Extremely Low 22, Low 9, High 0, Extremely High 1
+2026-10-21 17:59:32,434 INFO collect_dataset: Epoch 108 done; rows per class: Extremely Low 216, Low 218, High 219, Extremely High 219
+2026-10-21 17:59:33,461 INFO traffic_gen: Scenario 1517650880: links per class Extremely Low 32, Low 0, High 0, Extremely High 0
+2026-10-21 18:01:19,510 INFO collect_dataset: Epoch 109 done; rows per class: Extremely Low 224, Low 218, High 219, Extremely High 219
+2026-10-21 18:01:20,544 INFO traffic_gen: Scenario 1559902385: links per class Extremely Low 21, Low 6, High 3, Extremely High 2
+2026-10-21 18:03:08,867 INFO collect_dataset: Epoch 110 done; rows per class: Extremely Low 224, Low 222, High 222, Extremely High 220
+2026-10-21 18:03:09,889 INFO traffic_gen: Scenario 187266502: links per class Extremely Low 27, Low 2, High 0, Extremely High 3
+2026-10-21 18:05:20,467 INFO collect_dataset: Epoch 111 done; rows per class: Extremely Low 227, Low 224, High 222, Extremely High 223
+2026-10-21 18:05:21,500 INFO traffic_gen: Scenario 1820547445: links per class Extremely Low 17, Low 3, High 12, Extremely High 0
+2026-10-21 18:07:10,242 INFO collect_dataset: Epoch 112 done; rows per class: Extremely Low 227, Low 224, High 230, Extremely High 223
+2026-10-21 18:07:11,262 INFO traffic_gen: Scenario 1866754054: links per class Extremely Low 18, Low 2, High 1, Extremely High 11
+2026-10-21 18:11:19,282 INFO collect_dataset: Epoch 113 done; rows per class: Extremely Low 228, Low 224, High 230, Extremely High 230
+2026-10-21 18:11:20,334 INFO traffic_gen: Scenario 1470011974: links per class Extremely Low 23, Low 9, High 0, Extremely High 0
+2026-10-21 18:12:38,919 INFO collect_dataset: Stopped; rerun the same command to resume
+2026-10-21 18:12:41,898 INFO collect_dataset: Dataset: /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/fattree/data/fattree_dataset.csv (912 rows)

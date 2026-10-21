@@ -1,5 +1,7 @@
 """
-collect_dataset.py - build the 4-class GEANT2 path dataset (needs root and a running Floodlight).
+collect_dataset.py - build the 4-class path dataset of GEANT2 or the k=4 fat-tree (needs root and a
+running Floodlight). `--topology fattree` collects on the fat-tree (../fattree/fattree_topo.py) with the same
+traffic classes, probes and features; only the network, the Sender/Receiver and the defaults below change.
 
 Each epoch:
   1. the traffic generator draws and applies a new scenario (per-link offered loads), then waits
@@ -25,6 +27,8 @@ about 10 s per probe it takes 11-12 hours.
 
     ./start_floodlight.sh                                     # separate terminal
     sudo .venv/bin/python geant2/collect_dataset.py           # -> geant2/data/geant2_dataset.csv
+    sudo .venv/bin/python geant2/collect_dataset.py --topology fattree --samples 1000
+                                                              # -> fattree/data/fattree_dataset.csv
 """
 from __future__ import annotations
 
@@ -41,16 +45,32 @@ from collections import Counter
 import networkx as nx
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from geant2_topo import RECEIVER, SENDER, build_geant2, chown_to_invoking_user, hosts_on, start_geant2  # noqa: E402
+import geant2_topo  # noqa: E402
+from geant2_topo import chown_to_invoking_user, hosts_on  # noqa: E402
 from path_discovery import yen_hop_count  # noqa: E402
 from telemetry import FEATURE_NAMES, PathTelemetry, TelemetryClient  # noqa: E402
 from telemetry_and_model import ControllerError, FlowInstaller  # noqa: E402
 from topology_builder import stop_network  # noqa: E402
 from traffic_gen import CLASS_BANDS, CLASS_NAMES, TrafficGenerator, sample_scenario  # noqa: E402
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fattree"))
+import fattree_topo  # noqa: E402
+
 log = logging.getLogger("collect_dataset")
 GEANT2_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_OUT = os.path.join(GEANT2_DIR, "data", "geant2_dataset.csv")
+PROJECT_DIR = os.path.dirname(GEANT2_DIR)
+# per topology: build, start, Sender, Receiver, switches of the random probe pairs (None: all),
+# path length the class balance targets (that of the candidates), default output
+TOPOLOGIES = {
+    "geant2": dict(build=geant2_topo.build_geant2, start=geant2_topo.start_geant2,
+                   sender=geant2_topo.SENDER, receiver=geant2_topo.RECEIVER, probe_switches=None, path_hops=6.0,
+                   out=os.path.join(GEANT2_DIR, "data", "geant2_dataset.csv")),
+    "fattree": dict(build=fattree_topo.build_fattree, start=fattree_topo.start_fattree,
+                    sender=fattree_topo.SENDER, receiver=fattree_topo.RECEIVER,
+                    probe_switches=fattree_topo.EDGE_SWITCHES, path_hops=4.0,
+                    out=os.path.join(PROJECT_DIR, "fattree", "data", "fattree_dataset.csv")),
+}
+DEFAULT_OUT = TOPOLOGIES["geant2"]["out"]
 META_COLUMNS = ["epoch", "time", "src", "dst", "path", "bottleneck_load"]
 LABEL_COLUMNS = ["traffic_class", "traffic_class_name"]
 PROBE_PRIORITY = 40000
@@ -67,10 +87,11 @@ def existing_rows(path: str) -> tuple[Counter, int]:
     return counts, epoch
 
 
-def epoch_paths(spec, rng: random.Random, candidates: list[list[str]], extra_pairs: int):
+def epoch_paths(spec, rng: random.Random, candidates: list[list[str]], extra_pairs: int,
+                sender: str = geant2_topo.SENDER, receiver: str = geant2_topo.RECEIVER, probe_switches=None):
     """(src host, dst host, switch path) to probe this epoch."""
-    probes = [(SENDER, RECEIVER, path) for path in candidates]
-    switches = sorted(spec.graph.nodes, key=lambda s: int(s[1:]))
+    probes = [(sender, receiver, path) for path in candidates]
+    switches = sorted(probe_switches or spec.graph.nodes, key=lambda s: int(s[1:]))
     while len(probes) < len(candidates) + extra_pairs:
         a, b = rng.sample(switches, 2)
         if nx.shortest_path_length(spec.graph, a, b) < 2:
@@ -83,7 +104,10 @@ def measure_epoch(spec, rng, candidates, args, scenario, counts, quota, installe
     """Probe this epoch's paths; returns (src, dst, path, features, label) rows that passed the checks."""
     rows, pending = [], Counter()
     link_util = telemetry.link_utilization()
-    for index, (src, dst, path) in enumerate(epoch_paths(spec, rng, candidates, args.extra_pairs)):
+    topology = TOPOLOGIES[args.topology]
+    probes = epoch_paths(spec, rng, candidates, args.extra_pairs, topology["sender"], topology["receiver"],
+                         topology["probe_switches"])
+    for index, (src, dst, path) in enumerate(probes):
         label = scenario.path_class(path)
         if args.balance and counts[label] + pending[label] >= quota:
             continue
@@ -108,11 +132,13 @@ def collect(args) -> str:
     api = TelemetryClient(args.controller_url)
     if not api.health():
         raise SystemExit(f"Floodlight is not reachable at {args.controller_url} (start ./start_floodlight.sh)")
-    spec = build_geant2(args.hosts_per_switch)
-    candidates = yen_hop_count(spec.graph, spec.hosts[SENDER].switch, spec.hosts[RECEIVER].switch, 5)
+    topology = TOPOLOGIES[args.topology]
+    spec = topology["build"](args.hosts_per_switch)
+    candidates = yen_hop_count(spec.graph, spec.hosts[topology["sender"]].switch,
+                               spec.hosts[topology["receiver"]].switch, 5)
     quota = math.ceil(args.samples / len(CLASS_NAMES))
     counts, first_epoch = existing_rows(args.out)
-    log.info("Target %d rows (%s); already have %s", args.samples, "balanced" if args.balance else "unbalanced",
+    log.info("%s: target %d rows (%s); already have %s", args.topology, args.samples, "balanced" if args.balance else "unbalanced",
              dict(sorted(counts.items())))
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     new_file = not os.path.exists(args.out)
@@ -126,7 +152,7 @@ def collect(args) -> str:
     net = generator = None
     installer = FlowInstaller(api, spec)
     try:
-        net = start_geant2(spec, api)
+        net = topology["start"](spec, api)
         generator = TrafficGenerator(net, spec, installer)
         generator.start()
         telemetry = PathTelemetry(net, spec, api, probe_seconds=args.probe_seconds)
@@ -183,11 +209,13 @@ def main():
     parser.add_argument("--samples", type=int, default=4000, help="target number of rows")
     parser.add_argument("--no-balance", dest="balance", action="store_false",
                         help="keep every probed path instead of capping each class at samples / 4")
-    parser.add_argument("--out", default=DEFAULT_OUT)
+    parser.add_argument("--topology", choices=sorted(TOPOLOGIES), default="geant2")
+    parser.add_argument("--out", help="default: geant2/data/geant2_dataset.csv or fattree/data/fattree_dataset.csv")
     parser.add_argument("--extra-pairs", type=int, default=3, help="random host pairs probed per epoch")
     parser.add_argument("--probe-seconds", type=int, default=5, help="iperf3 probe length")
     parser.add_argument("--warmup", type=float, default=5.0, help="seconds after a new scenario before measuring")
-    parser.add_argument("--path-hops", type=float, default=6.0, help="path length the class balance targets")
+    parser.add_argument("--path-hops", type=float,
+                        help="path length the class balance targets (default: 6 on GEANT2, 4 on the fat-tree)")
     parser.add_argument("--targeted", type=float, default=0.7,
                         help="share of epochs whose scenario targets the class furthest behind its quota")
     parser.add_argument("--max-epochs", type=int)
@@ -195,6 +223,8 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--controller-url", default="http://127.0.0.1:8080")
     args = parser.parse_args()
+    args.out = args.out or TOPOLOGIES[args.topology]["out"]
+    args.path_hops = args.path_hops or TOPOLOGIES[args.topology]["path_hops"]
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("mininet").propagate = False

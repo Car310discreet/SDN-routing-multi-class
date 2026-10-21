@@ -3,6 +3,8 @@ mininet @ git+https://github.com/mininet/mininet.git@2.3.1b4
 nfstream==6.6.0
 pingparsing==1.4.2
 requests==2.34.2
+networkx==3.7
+pytest==9.1.1
 numpy==2.4.6
 pandas==3.0.6
 scikit-learn==1.9.1

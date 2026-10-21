@@ -136,7 +136,7 @@ def start_without_ipv6(spec: TopologySpec):
 
 
 def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0,
-                 max_loss_pct: float = 1.0):
+                 max_loss_pct: float = 1.0, endpoints: tuple[str, str] = (SENDER, RECEIVER)):
     """
     Start GEANT2 on Floodlight, wait for every switch, clear old static entries and check connectivity
     (needs root).
@@ -144,7 +144,7 @@ def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float
     pingAll sends one ping per host pair with a 1 s timeout, so a few pairs can time out while
     Floodlight sets up reactive flows. Up to `max_loss_pct` of isolated misses is accepted. A broken
     controller loses whole hosts: 46 of the 552 pairs per unreachable host, more than 8 %. The
-    Sender <-> Receiver pair must always answer.
+    Sender <-> Receiver pair (`endpoints`, also used for the fat-tree) must always answer.
     """
     from telemetry_and_model import ControllerError, wait_for_switches
     net = start_without_ipv6(spec)
@@ -154,7 +154,7 @@ def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float
         api.set_routing_metric("hopcount")
         if ping_all:
             log.info("Testing connectivity (pingAll) so Floodlight learns every host")
-            endpoints = [net.get(SENDER), net.get(RECEIVER)]
+            endpoints = [net.get(host) for host in endpoints]
             for attempt in range(2):
                 loss = net.pingAll()
                 pair_loss = net.ping(endpoints, timeout="2")
