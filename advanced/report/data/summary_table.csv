@@ -1,0 +1,5 @@
+,scenarios,psnr_db,ssim,mean_rtt_ms,mean_jitter_ms,mean_throughput_mbps,packet_loss_pct,frames_decoded,chosen_true_class,stage1_ms,stage2_inference_ms,telemetry_s,stage2_probe_s
+Hop-count,3,15.1345,0.7274,,24.083,0.021,99.5833,12.0,3.0,0.651,0.0,18.7367,0.0
+QoS-aware,3,31.336,0.9281,504.5837,12.0097,4.3247,6.7033,3697.6667,1.0,0.6476,0.0,18.88,0.0
+Hop candidates + ML,3,31.2591,0.9286,510.216,12.2283,4.308,6.764,3684.0,1.0,2.0246,57.2376,18.7167,195.34
+Combined (multi-metric + ML),3,38.428,0.9976,160.539,12.8643,4.645,0.0013,3968.0,0.3333,2.939,39.9027,18.9633,81.0333

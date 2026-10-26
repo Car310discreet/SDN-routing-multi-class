@@ -1,0 +1,17 @@
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\footnotesize}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Multi-Metric Discovery with Multi-Class Ensemble Selection on GEANT2}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\usepackage{url}
+\makeatletter\g@addto@macro{\UrlBreaks}{\do\_\do\-}\makeatother
+\urlstyle{tt}
+\usepackage{float}
+\floatplacement{figure}{H}
+\usepackage{caption}
+\captionsetup[figure]{font=small,labelfont=bf}
