@@ -40,6 +40,8 @@ log = logging.getLogger(__name__)
 
 ADVANCED_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_MODEL = os.path.join(ADVANCED_DIR, "models", "multiclass_bundle.joblib")
+MODEL_PATHS = {"geant2": DEFAULT_MODEL,                 # each topology's model, trained on its own dataset
+               "fattree": os.path.join(ADVANCED_DIR, "models", "fattree_bundle.joblib")}
 ACTIVE_FEATURES = ["rtt_avg_ms", "rtt_min_ms", "rtt_max_ms", "rtt_mdev_ms", "packet_loss_pct",
                    "throughput_mbps", "bw_utilization_pct", "retransmits", "hop_count"]
 PASSIVE_FEATURES = ["path_max_link_util_pct", "path_mean_link_util_pct"]
@@ -294,12 +296,15 @@ class PathTelemetry:
         self.net, self.spec = net, spec
         self.ping_count, self.ping_interval, self.ping_deadline_s = ping_count, ping_interval, ping_deadline_s
         self.probe_seconds, self.drain_s, self.port = probe_seconds, drain_s, port
+        self.last_timing: dict = {}      # seconds spent in each step of the last measure()
 
     def measure(self, src_host: str, dst_host: str, path: list[str], snapshot: LinkSnapshot) -> dict:
         src, dst = self.net.get(src_host), self.net.get(dst_host)
         dst_ip = self.spec.hosts[dst_host].ip
+        t0 = time.monotonic()
         features = parse_ping(src.cmd(f"ping -q -c {self.ping_count} -i {self.ping_interval} "
                                       f"-W {self.ping_deadline_s:g} {dst_ip}"), self.ping_deadline_s)
+        t1 = time.monotonic()
         server = dst.popen(["iperf3", "-s", "-1", "-p", str(self.port)], stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
         time.sleep(0.5)
@@ -313,9 +318,12 @@ class PathTelemetry:
         if server.poll() is None:
             server.terminate()
         features.update(parse_iperf(stdout, self.spec.link_bw_mbps))
+        t2 = time.monotonic()
         time.sleep(self.drain_s)         # let the probe's queues drain before the next path is measured
+        t3 = time.monotonic()
         features["hop_count"] = len(path) - 1
         features.update(passive_features(snapshot, path, self.spec.link_bw_mbps))
+        self.last_timing = {"ping_s": t1 - t0, "iperf_s": t2 - t1, "drain_s": t3 - t2}
         return {name: float(features[name]) for name in FEATURE_NAMES}
 
 
@@ -345,6 +353,7 @@ class MultiClassModel:
             raise ValueError(f"Unknown model {which!r}; bundle has {sorted(options)}")
         self.name, self.model = which, options[which]
         self.features, self.classes = list(bundle["features"]), list(bundle["classes"])
+        self.last_assembly_ms = 0.0          # feature-matrix build time of the last predict_batch()
 
     @classmethod
     def load(cls, path: str = DEFAULT_MODEL, which: str = "ensemble") -> "MultiClassModel":
@@ -356,12 +365,15 @@ class MultiClassModel:
     def predict_batch(self, feature_rows: list[dict]) -> tuple[list[int], np.ndarray, float]:
         """(classes 0-3, class probabilities, inference time in ms) for all candidates in one call.
         One batched call pays each member model's fixed per-call overhead once instead of K times."""
+        assembly_start = time.perf_counter()
         rows = np.asarray([[f[name] for name in self.features] for f in feature_rows], dtype=float)
         if not np.all(np.isfinite(rows)):
             raise ValueError(f"Non-finite feature vector in {feature_rows}")
         start = time.perf_counter()
         probabilities = self.model.predict_proba(rows)
-        return [int(c) for c in np.argmax(probabilities, axis=1)], probabilities, (time.perf_counter() - start) * 1000
+        inference_ms = (time.perf_counter() - start) * 1000
+        self.last_assembly_ms = (start - assembly_start) * 1000
+        return [int(c) for c in np.argmax(probabilities, axis=1)], probabilities, inference_ms
 
     def predict(self, features: dict) -> tuple[int, np.ndarray, float]:
         classes, probabilities, ms = self.predict_batch([features])
@@ -381,6 +393,7 @@ class ScoredCandidate:
     predicted_name: str
     probabilities: list[float]
     probe_s: float
+    timing: dict = field(default_factory=dict)     # this candidate's probe steps (see Stage2Result.timing)
 
 
 @dataclass
@@ -391,6 +404,10 @@ class Stage2Result:
     probe_s: float
     inference_ms: float
     scored: list[ScoredCandidate] = field(default_factory=list)
+    # totals over all candidates: probe_install_ms / probe_remove_ms (static entries pinning the probe),
+    # ping_s, iperf_s, drain_s (PathTelemetry), assembly_ms (feature matrix), inference_ms (one batched
+    # predict_proba for all K candidates), select_ms (choose())
+    timing: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -413,24 +430,36 @@ class MultiClassPathSelector:
         src_ip, dst_ip = spec.hosts[src_host].ip, spec.hosts[dst_host].ip
         measured = []
         for rank, candidate in enumerate(candidates):
+            t0 = time.monotonic()
             names = self.installer.install_path(src_ip, dst_ip, candidate.switches, prefix=f"probe{rank}",
                                                 priority=PROBE_PRIORITY, ip_protos=[1, 6])
             started = time.monotonic()
             try:
                 features = self.telemetry.measure(src_host, dst_host, candidate.switches, snapshot)
             finally:
+                measured_at = time.monotonic()
                 self.installer.remove(names)
-            measured.append((features, round(time.monotonic() - started, 2)))
-        classes, probabilities, inference_ms = self.model.predict_batch([f for f, _ in measured])
+            steps = {"probe_install_ms": (started - t0) * 1000, "probe_remove_ms": (time.monotonic() - measured_at) * 1000,
+                     **getattr(self.telemetry, "last_timing", {})}
+            measured.append((features, round(measured_at - started, 2), steps))
+        # every candidate's features in one batched predict_proba call
+        classes, probabilities, inference_ms = self.model.predict_batch([f for f, _, _ in measured])
         scored = []
-        for rank, (candidate, (features, probe_s), predicted, probs) in enumerate(
+        for rank, (candidate, (features, probe_s, steps), predicted, probs) in enumerate(
                 zip(candidates, measured, classes, probabilities)):
             scored.append(ScoredCandidate(rank, candidate.switches, candidate.composite_cost,
                                           {k: round(v, 4) for k, v in features.items()}, predicted,
-                                          CLASS_NAMES[predicted], [round(float(p), 4) for p in probs], probe_s))
+                                          CLASS_NAMES[predicted], [round(float(p), 4) for p in probs], probe_s,
+                                          {k: round(v, 4) for k, v in steps.items()}))
             log.info("  candidate %d %s: %s (composite %.3f, %.2f Mbit/s, rtt %.0f ms)", rank,
                      "-".join(candidate.switches), CLASS_NAMES[predicted], candidate.composite_cost,
                      features["throughput_mbps"], features["rtt_avg_ms"])
+        select_start = time.perf_counter()
         best = choose(scored)
+        select_ms = (time.perf_counter() - select_start) * 1000
+        timing = {key: round(sum(s.timing.get(key, 0.0) for s in scored), 4)
+                  for key in ("probe_install_ms", "probe_remove_ms", "ping_s", "iperf_s", "drain_s")}
+        timing.update(assembly_ms=round(getattr(self.model, "last_assembly_ms", 0.0), 4),
+                      inference_ms=round(inference_ms, 4), select_ms=round(select_ms, 4))
         return Stage2Result(self.model.name, best.rank_in_stage1, best.switches,
-                            round(sum(s.probe_s for s in scored), 2), round(inference_ms, 4), scored)
+                            round(sum(s.probe_s for s in scored), 2), round(inference_ms, 4), scored, timing)

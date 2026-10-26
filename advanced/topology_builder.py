@@ -1,14 +1,17 @@
 """
-topology_builder.py - Module 1: the GEANT2 network and its 4-class background traffic.
+topology_builder.py - Module 1: the evaluation networks (GEANT2, k=4 fat-tree) and their 4-class traffic.
 
-Topology (Mininet + NetworkX)
-  GEANT2 as used by RouteNet / DRL-GNN: 24 switches, 37 links (edge list from
-  knowledgedefinednetworking/DRL-GNN). Switch-switch links default to 10 Mbit/s, 10 ms, a
-  1,000-packet queue: the conditions the GEANT2 multi-class dataset was collected under, so Stage 2
-  features stay in the model's training distribution. Hosts: one per switch (h<i> on s<i>, 10.0.0.<i+1>);
-  access links are not shaped.
-      Sender   h15 (s15)  - video source
-      Receiver h23 (s23)  - video sink, 6 hops away (the network diameter)
+Topologies (Mininet + NetworkX), `build_topology(name)`:
+  geant2   GEANT2 as used by RouteNet / DRL-GNN: 24 switches, 37 links (edge list from
+           knowledgedefinednetworking/DRL-GNN).
+               Sender h15 (s15) -> Receiver h23 (s23), 6 hops apart (the network diameter)
+  fattree  k=4 fat-tree data-centre fabric: 20 switches, 32 links. Core s0-s3; pod p has aggregation
+           switches s(4+2p), s(5+2p) and edge switches s(12+2p), s(13+2p).
+               Sender h12 (s12, pod 0) -> Receiver h18 (s18, pod 3), 4 hops apart; 4 equal-cost shortest paths
+Both use the conditions their datasets were collected under, so Stage 2 features stay in the models'
+training distribution: switch-switch links 10 Mbit/s, 10 ms, a 1,000-packet queue; one host per switch
+(h<i> on s<i>, 10.0.0.<i+1>; on the fat-tree, hosts on core / aggregation switches only source and sink
+background traffic); access links not shaped.
   `--delay-range LO HI` draws per-link propagation delays instead (seeded), which makes the latency
   metric discriminative but moves RTT features away from the training data.
 
@@ -23,10 +26,11 @@ Traffic (`TrafficGenerator`, `Scenario`)
   link with static entries, at a rate set by the link's class:
       0 Extremely Low [0.00, 0.25)   1 Low [0.25, 0.50)   2 High [0.50, 0.80)   3 Extremely High [0.80, 1.20]
   (fraction of capacity). A path's ground-truth class is the class of its most loaded link. Link classes
-  are drawn so that 6-hop path classes are balanced: P(link class <= c) = ((c + 1) / 4) ** (1 / 6).
+  are drawn so that path classes are balanced for the topology's Sender -> Receiver path length h
+  (6 on GEANT2, 4 on the fat-tree): P(link class <= c) = ((c + 1) / 4) ** (1 / h).
 
-    python advanced/topology_builder.py                 # offline summary
-    python advanced/topology_builder.py --preview       # class balance of sampled scenarios
+    python advanced/topology_builder.py [--topology fattree]             # offline summary
+    python advanced/topology_builder.py [--topology fattree] --preview   # class balance of sampled scenarios
 """
 from __future__ import annotations
 
@@ -47,17 +51,40 @@ from mininet.topo import Topo
 logging.setLoggerClass(logging.Logger)
 log = logging.getLogger(__name__)
 
-NUM_SWITCHES = 24
+NUM_SWITCHES = 24          # GEANT2
 GEANT2_LINKS = [
     (0, 1), (0, 2), (1, 3), (1, 6), (1, 9), (2, 3), (2, 4), (3, 6), (4, 7), (5, 3),
     (5, 8), (6, 9), (6, 8), (7, 11), (7, 8), (8, 11), (8, 20), (8, 17), (8, 18), (8, 12),
     (9, 10), (9, 13), (9, 12), (10, 13), (11, 20), (11, 14), (12, 13), (12, 19), (12, 21),
     (14, 15), (15, 16), (16, 17), (17, 18), (18, 21), (19, 23), (21, 22), (22, 23),
 ]
+
+
+def fat_tree_links(k: int = 4) -> list[tuple[int, int]]:
+    """Core switches first, then aggregation, then edge; aggregation switch a of a pod -> core a*k/2 ...;
+    every edge switch -> both aggregation switches of its pod."""
+    half = k // 2
+    agg, edge = half * half, half * half + k * half
+    links = []
+    for pod in range(k):
+        for a in range(half):
+            links += [(c, agg + pod * half + a) for c in range(a * half, (a + 1) * half)]
+        for e in range(half):
+            links += [(agg + pod * half + a, edge + pod * half + e) for a in range(half)]
+    return links
+
+
+FATTREE_LINKS = fat_tree_links(4)
+FATTREE_EDGE_SWITCHES = [f"s{i}" for i in range(12, 20)]
+TOPOLOGIES = {
+    # links, switches, Sender, Receiver, path length the scenario class balance targets
+    "geant2": dict(links=GEANT2_LINKS, num_switches=NUM_SWITCHES, sender="h15", receiver="h23", path_hops=6.0),
+    "fattree": dict(links=FATTREE_LINKS, num_switches=20, sender="h12", receiver="h18", path_hops=4.0),
+}
 LINK_BW_MBPS = 10.0
 LINK_DELAY_MS = 10.0
 QUEUE_SIZE = 1000
-SENDER, RECEIVER = "h15", "h23"
+SENDER, RECEIVER = "h15", "h23"          # GEANT2; every spec carries its own (spec.sender, spec.receiver)
 
 CLASS_NAMES = ["Extremely Low", "Low", "High", "Extremely High"]
 CLASS_BANDS = [(0.00, 0.25), (0.25, 0.50), (0.50, 0.80), (0.80, 1.20)]
@@ -81,6 +108,10 @@ class TopologySpec:
     hosts: dict[str, HostInfo]
     switch_dpids: dict[str, str]         # switch -> Floodlight DPID (colon form)
     link_bw_mbps: float = LINK_BW_MBPS
+    name: str = "geant2"
+    sender: str = SENDER
+    receiver: str = RECEIVER
+    path_hops: float = 6.0               # path length the scenario class balance targets
 
     @property
     def dpid_to_switch(self) -> dict[str, str]:
@@ -109,37 +140,52 @@ def dpid(index: int) -> str:
     return f"{index + 1:016x}"
 
 
-class Geant2Topo(Topo):
-    def build(self, delays: dict, bw: float = LINK_BW_MBPS, queue: int = QUEUE_SIZE):
-        for i in range(NUM_SWITCHES):
+class SwitchGraphTopo(Topo):
+    def build(self, links: list, num_switches: int, delays: dict, bw: float = LINK_BW_MBPS, queue: int = QUEUE_SIZE):
+        for i in range(num_switches):
             self.addSwitch(f"s{i}", dpid=dpid(i), protocols="OpenFlow13")
-        for a, b in GEANT2_LINKS:
+        for a, b in links:
             self.addLink(f"s{a}", f"s{b}", bw=bw, delay=f"{delays[(a, b)]}ms", max_queue_size=queue, use_htb=True)
-        for i in range(NUM_SWITCHES):
+        for i in range(num_switches):
             host = self.addHost(f"h{i}", ip=f"10.0.0.{i + 1}/8")
             self.addLink(f"s{i}", host)          # access link: not shaped
 
 
-def build_geant2(link_bw_mbps: float = LINK_BW_MBPS, delay_range_ms: tuple[float, float] | None = None,
-                 seed: int = 1) -> TopologySpec:
+def build_topology(name: str = "geant2", link_bw_mbps: float = LINK_BW_MBPS,
+                   delay_range_ms: tuple[float, float] | None = None, seed: int = 1) -> TopologySpec:
+    if name not in TOPOLOGIES:
+        raise ValueError(f"Unknown topology {name!r}; choose from {sorted(TOPOLOGIES)}")
+    config = TOPOLOGIES[name]
+    links, num_switches = config["links"], config["num_switches"]
     if delay_range_ms is None:
-        delays = {link: LINK_DELAY_MS for link in GEANT2_LINKS}
+        delays = {link: LINK_DELAY_MS for link in links}
     else:
         rng = random.Random(seed)
-        delays = {link: round(rng.uniform(*delay_range_ms), 1) for link in GEANT2_LINKS}
-    topo = Geant2Topo(delays=delays, bw=link_bw_mbps)
+        delays = {link: round(rng.uniform(*delay_range_ms), 1) for link in links}
+    topo = SwitchGraphTopo(links=links, num_switches=num_switches, delays=delays, bw=link_bw_mbps)
     graph = nx.Graph()
-    graph.add_nodes_from(f"s{i}" for i in range(NUM_SWITCHES))
-    for a, b in GEANT2_LINKS:
+    graph.add_nodes_from(f"s{i}" for i in range(num_switches))
+    for a, b in links:
         u, v = f"s{a}", f"s{b}"
         port_u, port_v = topo.port(u, v)
         graph.add_edge(u, v, ports={u: port_u, v: port_v}, delay_ms=delays[(a, b)], capacity_mbps=link_bw_mbps)
     hosts = {}
-    for i in range(NUM_SWITCHES):
+    for i in range(num_switches):
         switch_port, _ = topo.port(f"s{i}", f"h{i}")
         hosts[f"h{i}"] = HostInfo(f"h{i}", f"10.0.0.{i + 1}", f"s{i}", switch_port)
-    dpids = {f"s{i}": ":".join(dpid(i)[k:k + 2] for k in range(0, 16, 2)) for i in range(NUM_SWITCHES)}
-    return TopologySpec(topo, graph, hosts, dpids, link_bw_mbps)
+    dpids = {f"s{i}": ":".join(dpid(i)[k:k + 2] for k in range(0, 16, 2)) for i in range(num_switches)}
+    return TopologySpec(topo, graph, hosts, dpids, link_bw_mbps, name, config["sender"], config["receiver"],
+                        config["path_hops"])
+
+
+def build_geant2(link_bw_mbps: float = LINK_BW_MBPS, delay_range_ms: tuple[float, float] | None = None,
+                 seed: int = 1) -> TopologySpec:
+    return build_topology("geant2", link_bw_mbps, delay_range_ms, seed)
+
+
+def build_fattree(link_bw_mbps: float = LINK_BW_MBPS, delay_range_ms: tuple[float, float] | None = None,
+                  seed: int = 1) -> TopologySpec:
+    return build_topology("fattree", link_bw_mbps, delay_range_ms, seed)
 
 
 # ----------------------------------------------------------------------------------------
@@ -148,9 +194,9 @@ def build_geant2(link_bw_mbps: float = LINK_BW_MBPS, delay_range_ms: tuple[float
 IPV6_DEFAULT = "/proc/sys/net/ipv6/conf/default/disable_ipv6"
 
 
-def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0,
-                 max_loss_pct: float = 1.0, controller_ip="127.0.0.1", controller_port=6653):
-    """Start GEANT2 on Floodlight with IPv6 off and static ARP; check connectivity. Needs root."""
+def start_topology(spec: TopologySpec, api, ping_all: bool = True, settle_s: float = 30.0,
+                   max_loss_pct: float = 1.0, controller_ip="127.0.0.1", controller_port=6653):
+    """Start the network on Floodlight with IPv6 off and static ARP; check connectivity. Needs root."""
     from mininet.link import TCLink
     from mininet.net import Mininet
     from mininet.node import OVSKernelSwitch, RemoteController
@@ -183,7 +229,7 @@ def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float
         api.clear_flows()            # static entries of earlier runs reappear on reused DPIDs
         api.set_routing_metric("hopcount")
         if ping_all:
-            endpoints = [net.get(SENDER), net.get(RECEIVER)]
+            endpoints = [net.get(spec.sender), net.get(spec.receiver)]
             for attempt in range(2):
                 loss = net.pingAll()
                 pair_loss = net.ping(endpoints, timeout="2")
@@ -199,6 +245,9 @@ def start_geant2(spec: TopologySpec, api, ping_all: bool = True, settle_s: float
         stop_network(net)
         raise
     return net
+
+
+start_geant2 = start_topology
 
 
 def stop_network(net) -> None:
@@ -362,17 +411,19 @@ class TrafficGenerator:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--topology", default="geant2", choices=sorted(TOPOLOGIES))
     parser.add_argument("--preview", action="store_true", help="class balance of 2,000 sampled scenarios")
     args = parser.parse_args()
-    spec = build_geant2()
-    s, r = spec.hosts[SENDER], spec.hosts[RECEIVER]
-    print(f"GEANT2: {spec.graph.number_of_nodes()} switches, {spec.graph.number_of_edges()} links, "
-          f"diameter {nx.diameter(spec.graph)}; Sender {SENDER} on {s.switch}, Receiver {RECEIVER} on {r.switch} "
-          f"({nx.shortest_path_length(spec.graph, s.switch, r.switch)} hops)")
+    spec = build_topology(args.topology)
+    s, r = spec.hosts[spec.sender], spec.hosts[spec.receiver]
+    print(f"{spec.name}: {spec.graph.number_of_nodes()} switches, {spec.graph.number_of_edges()} links, "
+          f"diameter {nx.diameter(spec.graph)}; Sender {spec.sender} on {s.switch}, Receiver {spec.receiver} on "
+          f"{r.switch} ({nx.shortest_path_length(spec.graph, s.switch, r.switch)} hops)")
     if args.preview:
         from path_discovery import discover_paths
         candidates = [p.switches for p in discover_paths(spec.graph, s.switch, r.switch, "hop", 5).paths]
-        counts = Counter(sample_scenario(spec.graph, seed).path_class(p) for seed in range(2000) for p in candidates)
+        counts = Counter(sample_scenario(spec.graph, seed, spec.path_hops).path_class(p)
+                         for seed in range(2000) for p in candidates)
         total = sum(counts.values())
         print("Hop-count candidates per class: " + ", ".join(f"{CLASS_NAMES[c]} {counts[c] / total:.1%}"
                                                               for c in range(4)))

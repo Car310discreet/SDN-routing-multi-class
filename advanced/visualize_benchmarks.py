@@ -37,14 +37,21 @@ import pandas as pd  # noqa: E402
 log = logging.getLogger("visualize_benchmarks")
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-PARADIGMS = ["hop_count", "qos_aware", "hop_ml", "advanced"]
-LABELS = {"hop_count": "Hop-count", "qos_aware": "QoS-aware", "hop_ml": "Hop candidates + ML",
-          "advanced": "Combined (multi-metric + ML)"}
-SHORT = {"hop_count": "Hop-\ncount", "qos_aware": "QoS-\naware", "hop_ml": "Hop cand.\n+ ML",
-         "advanced": "Combined\n(multi-metric\n+ ML)"}
-# Categorical slots 1-4 of a colour-blind-validated palette; aqua and yellow are below 3:1 against the
-# surface, so every bar carries a value label in ink and every line plot a legend
-COLORS = {"hop_count": "#2a78d6", "qos_aware": "#eb6834", "hop_ml": "#1baf7a", "advanced": "#eda100"}
+PARADIGMS = ["hop_count", "qos_aware", "bandwidth", "hop_ml", "advanced", "latency_ml", "bandwidth_ml"]
+LABELS = {"hop_count": "Hop-count", "qos_aware": "Latency", "bandwidth": "Bandwidth (widest)",
+          "hop_ml": "Baseline: hop-count + ML", "advanced": "Ours: combined + ML",
+          "latency_ml": "Latency + ML", "bandwidth_ml": "Bandwidth + ML"}
+SHORT = {"hop_count": "Hop-\ncount", "qos_aware": "Latency", "bandwidth": "Band-\nwidth",
+         "hop_ml": "Baseline\nhop + ML", "advanced": "Ours\ncombined\n+ ML",
+         "latency_ml": "Latency\n+ ML", "bandwidth_ml": "Band-\nwidth + ML"}
+# Categorical slots 1-4 of a colour-blind-validated palette, kept per paradigm across every figure; bandwidth
+# takes a deeper magenta step, which clears the all-pairs CVD check (dE >= 8) against the other four. Orange
+# and yellow sit at dE 13.7 for normal vision and aqua / yellow / magenta are below 3:1 against the surface,
+# so every bar carries a value label in ink, every line plot a legend and a per-paradigm line style.
+COLORS = {"hop_count": "#2a78d6", "qos_aware": "#eb6834", "bandwidth": "#b8407e", "hop_ml": "#1baf7a",
+          "advanced": "#eda100", "latency_ml": "#008300", "bandwidth_ml": "#6250d6"}
+LINESTYLES = {"hop_count": "-", "qos_aware": (0, (1, 1.5)), "bandwidth": (0, (6, 2)), "hop_ml": (0, (4, 2, 1, 2)),
+              "advanced": "-", "latency_ml": (0, (2, 2)), "bandwidth_ml": (0, (8, 2, 2, 2))}
 SURFACE, INK, INK_2, MUTED, GRID, AXIS = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 
 
@@ -115,7 +122,7 @@ def per_scenario_table(data: dict) -> pd.DataFrame:
 # ----------------------------------------------------------------------------------------
 # Figures
 # ----------------------------------------------------------------------------------------
-def plot_timeseries(paradigms: dict, scenario: int, path: str) -> None:
+def plot_timeseries(paradigms: dict, scenario: int, path: str, title_prefix: str = "") -> None:
     fig, axes = plt.subplots(3, 1, figsize=(9, 8.2), sharex=True)
     panels = [("throughput_mbps", "Throughput (Mbit/s)"), ("rtt_ms", "RTT (ms)"), ("jitter_ms", "Jitter (ms)")]
     for ax, (column, title) in zip(axes, panels):
@@ -125,21 +132,36 @@ def plot_timeseries(paradigms: dict, scenario: int, path: str) -> None:
                 continue
             values = pd.to_numeric(ts[column], errors="coerce")
             style = {"marker": "o", "markersize": 3} if values.isna().any() else {}
-            if paradigm == "hop_ml":
-                style.update(linestyle=(0, (4, 3)), zorder=4)
+            style.update(linestyle=LINESTYLES[paradigm], zorder=5 if paradigm == "advanced" else 3,
+                         linewidth=2.4 if paradigm == "advanced" else 1.8)
             ax.plot(ts["t_s"], values, color=COLORS[paradigm], label=LABELS[paradigm], **style)
+        if column == "rtt_ms":                 # a congested route's seconds-long RTT would flatten the rest
+            rtts = pd.concat([pd.to_numeric(paradigms[p]["timeseries"][column], errors="coerce")
+                              for p in paradigms if not paradigms[p]["timeseries"].empty]).dropna()
+            if len(rtts) and rtts.max() > 20 * max(rtts.median(), 1e-3):
+                ax.set_yscale("log")
+                title += " · log scale"
         ax.set_title(title)
     axes[-1].set_xlabel("Time (s)")
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 0.965), fontsize=8.5)
-    fig.suptitle(f"Scenario {scenario}: QoS during the video transfer", x=0.01, y=0.995, ha="left", fontsize=11,
-                 fontweight="bold")
+    fig.legend(handles, labels, loc="upper center", ncol=min(len(labels), 5), bbox_to_anchor=(0.5, 0.965),
+               fontsize=8.5, handlelength=3)
+    fig.suptitle(f"{title_prefix}Scenario {scenario}: QoS during the video transfer", x=0.01, y=0.995, ha="left",
+                 fontsize=11, fontweight="bold")
     fig.tight_layout(rect=(0, 0, 1, 0.955))
     fig.savefig(path)
     plt.close(fig)
 
 
 def plot_loss_boxplot(data: dict, table: pd.DataFrame, path: str) -> None:
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    loss_box(ax, data, table, "Per-second packet loss (%), all scenarios pooled")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def loss_box(ax, data: dict, table: pd.DataFrame, title: str) -> None:
     present = [p for p in PARADIGMS if p in set(table["paradigm"])]
     series = []
     for paradigm in present:
@@ -149,7 +171,6 @@ def plot_loss_boxplot(data: dict, table: pd.DataFrame, path: str) -> None:
             if ts is not None and not ts.empty:
                 values += pd.to_numeric(ts["packet_loss_pct"], errors="coerce").dropna().tolist()
         series.append(values or [np.nan])
-    fig, ax = plt.subplots(figsize=(8.5, 4.2))
     box = ax.boxplot(series, positions=range(len(present)), widths=0.55, patch_artist=True, showfliers=True,
                      medianprops=dict(color=INK, linewidth=1.6), flierprops=dict(marker="o", markersize=3,
                                                                                   markerfacecolor=MUTED,
@@ -165,13 +186,10 @@ def plot_loss_boxplot(data: dict, table: pd.DataFrame, path: str) -> None:
         ax.annotate(f"mean {mean:.1f}", xy=(i, 1.0), xycoords=("data", "axes fraction"), ha="center",
                     va="bottom", fontsize=8, color=INK_2)
     ax.set_xticks(range(len(present)), [SHORT[p] for p in present], fontsize=8.5)
-    ax.set_title("Per-second packet loss (%), all scenarios pooled", pad=16)
+    ax.set_title(title, pad=16)
     ax.set_ylim(bottom=0)
-    ax.legend(loc="upper right", fontsize=8)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.0, -0.2), fontsize=8)     # below the ticks, off the boxes
     ax.grid(axis="x", visible=False)
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
 
 
 def _bars(ax, table, key, title, hint, fmt):
@@ -239,7 +257,7 @@ def plot_computational_latency(table: pd.DataFrame, path: str) -> None:
     plt.close(fig)
 
 
-def plot_offline_latency(csv_path: str, path: str) -> None:
+def plot_offline_latency(csv_path: str, path: str, topology: str = "GEANT2") -> None:
     """Stage 1 per method and K (left) and Stage 2 batched inference per K (right): separate panels, because
     inference is an order of magnitude larger and would hide the differences between the methods."""
     df = pd.read_csv(csv_path)
@@ -260,7 +278,7 @@ def plot_offline_latency(csv_path: str, path: str) -> None:
                         fontsize=8, color=INK)
     ax.set_xticks(range(len(methods)), names)
     ax.set_title("Stage 1: path discovery (ms)", pad=16)
-    ax.text(0, 1.02, f"GEANT2, synthetic link telemetry, mean of {df['trial'].nunique()} trials",
+    ax.text(0, 1.02, f"{topology}, synthetic link telemetry, mean of {df['trial'].nunique()} trials",
             transform=ax.transAxes, fontsize=7.6, color=MUTED, va="bottom")
     ax.set_ylim(0, max(stage1.max() * 1.25, 1))
     ax.legend(loc="upper left", fontsize=8)
@@ -314,7 +332,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("path", nargs="?", default=os.path.join(PROJECT_DIR, "results", "advanced"))
     parser.add_argument("--benchmark", default=os.path.join(PROJECT_DIR, "results", "advanced",
-                                                            "decision_latency_benchmark.csv"))
+                                                            "decision_latency_benchmark_geant2.csv"))
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     try:

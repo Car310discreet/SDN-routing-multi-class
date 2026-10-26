@@ -16,8 +16,11 @@ For one routing paradigm, `VideoEvaluator.run()`:
      generator also sources and sinks iperf3 flows at the Sender's and Receiver's hosts;
   3. scores the received video frame by frame (frames.csv: frame, psnr_db, ssim) and overall.
 
-Video scoring uses FFmpeg's native H.264 decoder from the imageio-ffmpeg package, which conceals errors:
-Fedora's ffmpeg-free only has OpenH264, which decodes nothing from a badly damaged stream. Frames
+Video scoring needs FFmpeg's native H.264 decoder, which conceals errors: Fedora's ffmpeg-free only has
+OpenH264, which decodes nothing from a badly damaged stream. The system ffmpeg is used when it has the
+native decoder (Ubuntu's does), otherwise the static build from the imageio-ffmpeg package (which crashes
+decoding on some kernels, e.g. Ubuntu 24.04 with Linux 7.0). `python advanced/multimedia_evaluator.py
+--rescore RUN_DIR` re-scores the saved received.ts files of a run whose scoring failed. Frames
 identical to the original have infinite PSNR; per-frame means cap them at PSNR_CAP_DB.
 `frames_decoded` counts the frames actually recovered from the received file.
 (Combines extension/multimedia_evaluator.py from `improvements` with geant2/video_quality.py from `GEANT2`.)
@@ -52,12 +55,22 @@ PROBE_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "udp_pro
 PSNR_CAP_DB = 60.0
 
 
+def has_native_h264(binary: str) -> bool:
+    try:
+        proc = subprocess.run([binary, "-hide_banner", "-decoders"], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return proc.returncode == 0 and re.search(r"^\s*V\S*\s+h264\s", proc.stdout, re.MULTILINE) is not None
+
+
 def ffmpeg_binary() -> str:
+    if has_native_h264("ffmpeg"):
+        return "ffmpeg"
     try:
         import imageio_ffmpeg
         return imageio_ffmpeg.get_ffmpeg_exe()
     except (ImportError, RuntimeError):
-        log.warning("imageio-ffmpeg not installed; scoring with the system ffmpeg (may fail on damaged video)")
+        log.warning("No ffmpeg with the native H.264 decoder; scoring with the system ffmpeg (may fail on damaged video)")
         return "ffmpeg"
 
 
@@ -309,3 +322,79 @@ class VideoEvaluator:
             frames_decoded=decoded, psnr_db=overall.get("psnr"), ssim=overall.get("ssim"),
             psnr_frame_mean_db=round(sum(capped) / len(capped), 3) if capped else None,
             ssim_frame_mean=mean(f.get("ssim") for f in frames))
+
+
+# -- re-scoring a finished run ---------------------------------------------------------------
+SCORE_FIELDS = ("frames_reference", "frames_decoded", "psnr_db", "ssim", "psnr_frame_mean_db", "ssim_frame_mean")
+
+
+def rescore_dir(directory: str, video_path: str = DEFAULT_VIDEO) -> dict | None:
+    """Re-score <paradigm dir>/received.ts; update frames.csv and summary.json. Returns the new score fields."""
+    received, summary_path = os.path.join(directory, "received.ts"), os.path.join(directory, "summary.json")
+    if not (os.path.exists(received) and os.path.exists(summary_path)):
+        return None
+    evaluator = VideoEvaluator.__new__(VideoEvaluator)          # no network needed for scoring
+    evaluator.video_path = video_path
+    decoded, frames, overall = evaluator.frame_quality(received, os.path.join(directory, "frames.csv"))
+    capped = [min(f["psnr_db"], PSNR_CAP_DB) for f in frames if "psnr_db" in f and not math.isnan(f["psnr_db"])]
+    ssims = [f["ssim"] for f in frames if "ssim" in f]
+    scores = {"frames_reference": evaluator.decoded_frames(video_path), "frames_decoded": decoded,
+              "psnr_db": overall.get("psnr"), "ssim": overall.get("ssim"),
+              "psnr_frame_mean_db": round(sum(capped) / len(capped), 3) if capped else None,
+              "ssim_frame_mean": round(sum(ssims) / len(ssims), 3) if ssims else None}
+    with open(summary_path) as handle:
+        summary = json.load(handle)
+    summary.update(scores)
+    with open(summary_path, "w") as handle:
+        json.dump(summary, handle, indent=2)
+    return scores
+
+
+def needs_rescore(directory: str) -> bool:
+    try:
+        with open(os.path.join(directory, "summary.json")) as handle:
+            summary = json.load(handle)
+    except (OSError, ValueError):
+        return False
+    return summary.get("psnr_db") is None and os.path.exists(os.path.join(directory, "received.ts")) \
+        and os.path.getsize(os.path.join(directory, "received.ts")) > 0
+
+
+def rescore_run(run_dir: str, only_missing: bool = True, workers: int = 4) -> int:
+    """Re-score every paradigm of a run (by default only those without a PSNR); also updates run.json."""
+    from concurrent.futures import ProcessPoolExecutor
+    import glob
+    directories = sorted(d for d in glob.glob(os.path.join(run_dir, "scenario_*", "*"))
+                         if os.path.isdir(d) and (not only_missing or needs_rescore(d)))
+    if not directories:
+        return 0
+    log.info("Re-scoring %d videos in %s with %s", len(directories), run_dir, VideoEvaluator.ffmpeg)
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        results = dict(zip(directories, pool.map(rescore_dir, directories)))
+    run_json = os.path.join(run_dir, "run.json")
+    if os.path.exists(run_json):
+        with open(run_json) as handle:
+            meta = json.load(handle)
+        for directory, scores in results.items():
+            k, paradigm = os.path.basename(os.path.dirname(directory)).split("_", 1)[1], os.path.basename(directory)
+            entry = meta.get("scenarios", {}).get(k, {}).get("paradigms", {}).get(paradigm)
+            if entry and scores:
+                entry.setdefault("summary", {}).update(scores)
+        with open(run_json, "w") as handle:
+            json.dump(meta, handle, indent=2, default=str)
+    for directory, scores in results.items():
+        log.info("  %s: PSNR %s dB, SSIM %s, %s frames", os.path.relpath(directory, run_dir),
+                 (scores or {}).get("psnr_db"), (scores or {}).get("ssim"), (scores or {}).get("frames_decoded"))
+    return len(directories)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Re-score the received videos of finished runs")
+    parser.add_argument("--rescore", nargs="+", required=True, metavar="RUN_DIR")
+    parser.add_argument("--all", action="store_true", help="re-score every video, not only those without a PSNR")
+    parser.add_argument("--workers", type=int, default=4)
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    for run_dir in args.rescore:
+        rescore_run(run_dir, not args.all, args.workers)

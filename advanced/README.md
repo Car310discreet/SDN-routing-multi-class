@@ -25,6 +25,33 @@ git switch -c geant2-multi-metric-advanced
 git show GEANT2:geant2/data/geant2_dataset.csv > advanced/data/geant2_dataset.csv
 ```
 
+## Fat-tree and the final results
+
+A second topology, a **k=4 fat-tree** data-centre fabric (20 switches, 32 links), runs through the same
+pipeline. It differs from GEANT2 structurally: there is no hub, the diameter is 4, and the Sender h12 and
+the Receiver h18 have four equal-cost shortest paths.
+
+- Its dataset, [data/fattree_dataset.csv](data/fattree_dataset.csv), has 896 rows, 224 per class. It was
+  collected on the `GEANT2` branch (`collect_dataset.py --topology fattree`); `fattree_dataset_full.csv`
+  holds all 912 rows before balancing.
+- Its own soft-voting ensemble is `models/fattree_bundle.joblib`
+  (`train_models.py --topology fattree`; results in `results/training_fattree/`).
+- Every script takes `--topology {geant2,fattree}`. The Sender, the Receiver, the scenario class balance
+  and the model bundle follow from it.
+
+The comparison adds a **bandwidth** paradigm (widest path, K = 1) next to hop-count, latency
+(`qos_aware`), the hop-count + ML baseline (`hop_ml`) and ours (`advanced`). Every decision step is timed:
+link telemetry, Stage 1, probe-rule setup, ping, iperf3, queue drain, feature assembly, batched inference,
+selection and route installation. [run_final.sh](run_final.sh) produces everything:
+
+```bash
+./start_floodlight.sh                 # terminal 1
+advanced/run_final.sh                 # trains if needed, offline benchmarks, both live runs, final_results/
+```
+
+[final_results.py](final_results.py) writes `final_results/` at the project root. Every figure there sits
+next to the CSV it was drawn from, and the folder's README says what each one shows.
+
 ## Architecture
 
 ```

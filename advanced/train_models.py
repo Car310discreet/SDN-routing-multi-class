@@ -1,18 +1,22 @@
 """
-train_models.py - train the multi-class models on the GEANT2 dataset and save the Stage-2 bundle.
+train_models.py - train the multi-class models on a topology's dataset and save its Stage-2 bundle.
 
-Data: advanced/data/geant2_dataset.csv (500 paths, 125 per class, collected on the live GEANT2 network
-by the GEANT2 branch's collect_dataset.py). Classes: 0 Extremely Low, 1 Low, 2 High, 3 Extremely High.
-Split 70 / 15 / 15 (stratified, seed 40), as in the GEANT2 branch.
+Data, collected on the live network by the GEANT2 branch's collect_dataset.py:
+    geant2   advanced/data/geant2_dataset.csv   (500 paths, 125 per class)
+    fattree  advanced/data/fattree_dataset.csv  (896 paths, 224 per class; --topology fattree)
+Classes: 0 Extremely Low, 1 Low, 2 High, 3 Extremely High. Split 70 / 15 / 15 (stratified, seed 40),
+as in the GEANT2 branch.
 
 Models: XGBoost, Random Forest, Gradient Boosting, SVM (RBF, calibrated probabilities), and their
 soft-voting ensemble (mean of the four probability vectors). All are saved in one bundle,
-advanced/models/multiclass_bundle.joblib; Stage 2 uses the ensemble unless --model names a member.
+advanced/models/multiclass_bundle.joblib (fat-tree: fattree_bundle.joblib); Stage 2 uses the ensemble unless
+--model names a member.
 
-Outputs in advanced/results/training/: model_comparison.csv, confusion_matrix_<model>.csv,
-model_comparison.png.
+Outputs in advanced/results/training/ (fat-tree: training_fattree/): model_comparison.csv,
+confusion_matrix_<model>.csv, model_comparison.png.
 
     .venv/bin/python advanced/train_models.py
+    .venv/bin/python advanced/train_models.py --topology fattree
 """
 from __future__ import annotations
 
@@ -35,12 +39,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from telemetry_and_model import CLASS_NAMES, DEFAULT_MODEL, FEATURE_NAMES, SoftVotingEnsemble  # noqa: E402
+from telemetry_and_model import CLASS_NAMES, FEATURE_NAMES, MODEL_PATHS, SoftVotingEnsemble  # noqa: E402
 
 log = logging.getLogger("train_models")
 ADVANCED_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_DATA = os.path.join(ADVANCED_DIR, "data", "geant2_dataset.csv")
-DEFAULT_RESULTS = os.path.join(ADVANCED_DIR, "results", "training")
+DATASETS = {"geant2": os.path.join(ADVANCED_DIR, "data", "geant2_dataset.csv"),
+            "fattree": os.path.join(ADVANCED_DIR, "data", "fattree_dataset.csv")}
+RESULTS = {"geant2": os.path.join(ADVANCED_DIR, "results", "training"),
+           "fattree": os.path.join(ADVANCED_DIR, "results", "training_fattree")}
 SEED = 40
 
 
@@ -72,7 +78,7 @@ def load_dataset(path: str) -> tuple[np.ndarray, np.ndarray]:
     return df[FEATURE_NAMES].to_numpy(dtype=float), y
 
 
-def plot_comparison(table: pd.DataFrame, path: str) -> None:
+def plot_comparison(table: pd.DataFrame, path: str, test_size: int) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -93,7 +99,7 @@ def plot_comparison(table: pd.DataFrame, path: str) -> None:
         ax.set_title(title)
         ax.grid(axis="y", visible=False)
         ax.invert_yaxis()
-    fig.suptitle("Test-set scores (75 paths); blue: the soft-voting ensemble used by Stage 2", x=0.01, ha="left",
+    fig.suptitle(f"Test-set scores ({test_size} paths); blue: the soft-voting ensemble used by Stage 2", x=0.01, ha="left",
                  fontsize=9, color=MUTED)
     fig.tight_layout()
     fig.savefig(path)
@@ -142,22 +148,27 @@ def train(args) -> pd.DataFrame:
         slug = name.lower().split(" (")[0].replace(" ", "_")
         pd.DataFrame(matrix, index=CLASS_NAMES, columns=CLASS_NAMES).to_csv(
             os.path.join(args.results, f"confusion_matrix_{slug}.csv"))
-    plot_comparison(table, os.path.join(args.results, "model_comparison.png"))
+    plot_comparison(table, os.path.join(args.results, "model_comparison.png"), len(y_test))
 
     os.makedirs(os.path.dirname(os.path.abspath(args.model_out)), exist_ok=True)
     joblib.dump({"models": fitted, "ensemble": ensemble, "features": FEATURE_NAMES, "classes": CLASS_NAMES,
                  "metrics": table.set_index("model").round(4).to_dict(orient="index"),
-                 "dataset": os.path.relpath(args.data, ADVANCED_DIR)}, args.model_out)
+                 "dataset": os.path.relpath(args.data, ADVANCED_DIR), "topology": args.topology}, args.model_out)
     print(f"\nSaved the bundle (4 models + ensemble) to {args.model_out}")
     return table
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--data", default=DEFAULT_DATA)
-    parser.add_argument("--model-out", default=DEFAULT_MODEL)
-    parser.add_argument("--results", default=DEFAULT_RESULTS)
+    parser.add_argument("--topology", default="geant2", choices=sorted(DATASETS),
+                        help="sets the defaults of --data, --model-out and --results")
+    parser.add_argument("--data")
+    parser.add_argument("--model-out")
+    parser.add_argument("--results")
     args = parser.parse_args()
+    args.data = args.data or DATASETS[args.topology]
+    args.model_out = args.model_out or MODEL_PATHS[args.topology]
+    args.results = args.results or RESULTS[args.topology]
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     try:
         train(args)

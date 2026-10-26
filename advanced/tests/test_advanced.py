@@ -20,8 +20,8 @@ from path_discovery import (METHODS, CandidatePath, composite_link_costs, discov
                             synthetic_link_metrics)
 from telemetry_and_model import (DEFAULT_MODEL, FEATURE_NAMES, MultiClassModel, MultiClassPathSelector,  # noqa: E402
                                  ScoredCandidate, choose, link_stats_from, parse_iperf, parse_ping)
-from topology_builder import (CLASS_BANDS, RECEIVER, SENDER, build_geant2, class_of, link_class_weights,  # noqa: E402
-                              sample_scenario)
+from topology_builder import (CLASS_BANDS, RECEIVER, SENDER, build_fattree, build_geant2, class_of,  # noqa: E402
+                              link_class_weights, sample_scenario)
 
 SPEC = build_geant2()
 SRC, DST = SPEC.hosts[SENDER].switch, SPEC.hosts[RECEIVER].switch
@@ -37,6 +37,19 @@ def test_geant2_topology():
         assert len(ports) == len(set(ports))
     delays = nx.get_edge_attributes(build_geant2(delay_range_ms=(2, 10), seed=3).graph, "delay_ms")
     assert all(2 <= d <= 10 for d in delays.values()) and len(set(delays.values())) > 1
+
+
+def test_fattree_topology():
+    spec = build_fattree()
+    assert spec.graph.number_of_nodes() == 20 and spec.graph.number_of_edges() == 32
+    assert (spec.sender, spec.receiver, spec.path_hops) == ("h12", "h18", 4.0)
+    src, dst = spec.hosts[spec.sender].switch, spec.hosts[spec.receiver].switch
+    assert nx.shortest_path_length(spec.graph, src, dst) == nx.diameter(spec.graph) == 4
+    hops = [p.hops for p in discover_paths(spec.graph, src, dst, "hop", 5).paths]
+    assert hops == [4, 4, 4, 4, 6]                      # four equal-cost paths, one per core switch
+    counts = Counter(sample_scenario(spec.graph, seed, spec.path_hops).path_class(p.switches)
+                     for seed in range(500) for p in discover_paths(spec.graph, src, dst, "hop", 5).paths[:4])
+    assert all(0.18 < counts[c] / sum(counts.values()) < 0.32 for c in range(4))
 
 
 def test_four_class_traffic():
@@ -175,6 +188,19 @@ def test_selector_picks_least_congested_candidate():
         candidates, SENDER, RECEIVER, snapshot=None)
     assert result.chosen == candidates[2].switches and result.scored[2].predicted_class == 0
     assert all(protos == [1, 6] for _, protos in installer.calls)        # probes pin ICMP/TCP only
+    assert {"probe_install_ms", "ping_s", "assembly_ms", "inference_ms", "select_ms"} <= set(result.timing)
+
+
+@requires_model
+def test_stage2_predicts_all_candidates_in_one_batched_call():
+    candidates = discover_paths(GRAPH, SRC, DST, "composite", 5).paths
+    loads = dict(zip((tuple(c.switches) for c in candidates), (1.1, 0.7, 0.1, 0.4, 0.9)))
+    model = MultiClassModel.load()
+    calls = []
+    original = model.predict_batch
+    model.predict_batch = lambda rows: calls.append(len(rows)) or original(rows)
+    MultiClassPathSelector(FakeInstaller(), FakeTelemetry(loads), model).select(candidates, SENDER, RECEIVER, None)
+    assert calls == [5]
 
 
 # -- Modules 4 and 5 ---------------------------------------------------------------------------
@@ -227,7 +253,7 @@ def test_visualize_writes_all_figures(tmp_path):
     pd.DataFrame([{"trial": 0, "method": m, "k": k, "stage1_ms": 2.0, "stage2_inference_ms": 28.0}
                   for m in METHODS for k in (5, 10)]).to_csv(bench, index=False)
     summary = visualize_benchmarks.visualize(str(tmp_path / "advanced_x"), str(bench))
-    assert summary.loc["Combined (multi-metric + ML)", "psnr_db"] == pytest.approx(35.0)
+    assert summary.loc["Ours: combined + ML", "psnr_db"] == pytest.approx(5.0 * 4 + 20)
     for name in ("timeseries_scenario_0.png", "timeseries_scenario_1.png", "packet_loss_boxplot.png",
                  "video_quality.png", "computational_latency.png", "computational_latency_offline.png",
                  "summary_table.csv", "per_scenario.csv"):

@@ -1,0 +1,393 @@
+2026-10-21 22:42:10,251 INFO run_experiment: Benchmark (20 trials, model ensemble) in /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/results/advanced/decision_latency_benchmark_geant2.csv
+              stage1_ms  assembly_ms  stage2_inference_ms  stage2_sequential_ms  total_ms
+method    k                                                                              
+bandwidth 5       2.118        0.013               15.427                81.664    17.558
+          10      3.849        0.018               17.211               166.840    21.078
+composite 5       1.767        0.013               16.374                69.557    18.154
+          10      3.127        0.017               16.807               165.152    19.952
+hop       5       1.110        0.014               15.365                76.333    16.489
+          10      2.008        0.016               14.696               143.595    16.719
+latency   5       2.206        0.015               15.843                72.674    18.065
+          10      4.025        0.020               11.851               155.164    15.896
+2026-10-21 22:42:30,680 INFO run_experiment: Benchmark (20 trials, model ensemble) in /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/results/advanced/decision_latency_benchmark_fattree.csv
+              stage1_ms  assembly_ms  stage2_inference_ms  stage2_sequential_ms  total_ms
+method    k                                                                              
+bandwidth 5       1.003        0.012               13.982                67.986    14.996
+          10      1.719        0.015               13.956               132.874    15.690
+composite 5       0.780        0.012               13.571                68.171    14.362
+          10      1.345        0.014               14.271               124.028    15.631
+hop       5       0.585        0.012               15.335                63.959    15.932
+          10      1.116        0.016               13.406               136.987    14.537
+latency   5       1.054        0.013               12.244                65.375    13.310
+          10      1.725        0.017               15.501               145.495    17.243
+*** Ping: testing ping reachability
+h0 -> h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h1 -> h0 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h2 -> h0 h1 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h3 -> h0 h1 h2 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h4 -> h0 h1 h2 h3 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h5 -> h0 h1 h2 h3 h4 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h6 -> h0 h1 h2 h3 h4 h5 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h7 -> h0 h1 h2 h3 h4 h5 h6 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h8 -> h0 h1 h2 h3 h4 h5 h6 h7 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h9 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h10 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h11 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h12 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h13 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h14 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h14 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h15 h16 h17 h18 h19 h20 h21 h22 h23 
+h15 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h16 h17 h18 h19 h20 h21 h22 h23 
+h16 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h17 h18 h19 h20 h21 h22 h23 
+h17 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h18 h19 h20 h21 h22 h23 
+h18 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h19 h20 h21 h22 h23 
+h19 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h20 h21 h22 h23 
+h20 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h21 h22 h23 
+h21 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h22 h23 
+h22 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h23 
+h23 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h20 h21 h22 
+*** Results: 0% dropped (552/552 received)
+h15 -> h23 
+h23 -> h15 
+*** Results: 0% dropped (2/2 received)
+2026-10-21 22:44:38,049 INFO topology_builder: Pinned 74 background flows on 37 links
+2026-10-21 22:44:42,089 INFO topology_builder: Scenario 1000: links per class Extremely Low 27, Low 1, High 1, Extremely High 8
+2026-10-21 22:44:52,101 INFO run_experiment: === scenario 0: hop_count ===
+2026-10-21 22:44:54,892 INFO run_experiment: hop_count routes over s15-s14-s11-s8-s12-s19-s23 (ground truth: Extremely High; Stage 1 0.66 ms, Stage 2 inference 0.00 ms)
+2026-10-21 22:46:27,948 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 22:46:28,122 INFO multimedia_evaluator: [hop_count] PSNR None dB, SSIM None, video loss 82.45 %, RTT 13278.8 ms, jitter 15.33 ms, 0.78 Mbit/s
+2026-10-21 22:46:28,128 INFO run_experiment: === scenario 0: qos_aware ===
+2026-10-21 22:46:54,986 INFO run_experiment: qos_aware routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: High; Stage 1 3.54 ms, Stage 2 inference 0.00 ms)
+2026-10-21 22:48:28,174 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 22:48:28,356 INFO multimedia_evaluator: [qos_aware] PSNR None dB, SSIM None, video loss 9.23 %, RTT 1222.885 ms, jitter 13.989 ms, 4.11 Mbit/s
+2026-10-21 22:48:28,368 INFO run_experiment: === scenario 0: bandwidth ===
+2026-10-21 22:48:52,479 INFO run_experiment: bandwidth routes over s15-s16-s17-s8-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 11.63 ms, Stage 2 inference 0.00 ms)
+2026-10-21 22:50:25,320 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 22:50:25,463 INFO multimedia_evaluator: [bandwidth] PSNR None dB, SSIM None, video loss 0.00 %, RTT 176.383 ms, jitter 14.142 ms, 4.60 Mbit/s
+2026-10-21 22:50:25,465 INFO run_experiment: === scenario 0: hop_ml ===
+2026-10-21 22:54:11,191 INFO telemetry_and_model:   candidate 0 s15-s14-s11-s8-s12-s19-s23: Extremely High (composite 2228.041, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 22:54:11,192 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s12-s19-s23: Extremely High (composite 1083.888, 0.00 Mbit/s, rtt 7179 ms)
+2026-10-21 22:54:11,192 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s18-s21-s22-s23: High (composite 3.778, 3.35 Mbit/s, rtt 124 ms)
+2026-10-21 22:54:11,193 INFO telemetry_and_model:   candidate 3 s15-s14-s11-s7-s8-s12-s19-s23: Extremely High (composite 1883.907, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 22:54:11,193 INFO telemetry_and_model:   candidate 4 s15-s14-s11-s8-s18-s21-s22-s23: Extremely High (composite 1147.381, 0.00 Mbit/s, rtt 7194 ms)
+2026-10-21 22:54:11,472 INFO run_experiment: hop_ml routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: High; Stage 1 26.66 ms, Stage 2 inference 319.48 ms)
+2026-10-21 22:55:44,608 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 22:55:44,781 INFO multimedia_evaluator: [hop_ml] PSNR None dB, SSIM None, video loss 9.08 %, RTT 1205.392 ms, jitter 14.73 ms, 4.12 Mbit/s
+2026-10-21 22:55:44,781 INFO run_experiment: === scenario 0: advanced ===
+2026-10-21 22:58:11,699 INFO telemetry_and_model:   candidate 0 s15-s16-s17-s8-s18-s21-s22-s23: Extremely Low (composite 3.225, 6.57 Mbit/s, rtt 140 ms)
+2026-10-21 22:58:11,699 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s18-s21-s22-s23: High (composite 3.780, 3.37 Mbit/s, rtt 127 ms)
+2026-10-21 22:58:11,699 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s8-s6-s1-s9-s12-s21-s22-s23: Extremely High (composite 7.763, 1.97 Mbit/s, rtt 209 ms)
+2026-10-21 22:58:11,699 INFO telemetry_and_model:   candidate 3 s15-s16-s17-s8-s12-s21-s22-s23: Extremely High (composite 379.882, 0.00 Mbit/s, rtt 2486 ms)
+2026-10-21 22:58:11,699 INFO telemetry_and_model:   candidate 4 s15-s16-s17-s18-s8-s12-s21-s22-s23: Extremely High (composite 381.514, 0.00 Mbit/s, rtt 2501 ms)
+2026-10-21 22:58:12,136 INFO run_experiment: advanced routes over s15-s16-s17-s8-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 28.12 ms, Stage 2 inference 275.09 ms)
+2026-10-21 22:59:45,133 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 22:59:45,308 INFO multimedia_evaluator: [advanced] PSNR None dB, SSIM None, video loss 0.00 %, RTT 178.404 ms, jitter 14.606 ms, 4.60 Mbit/s
+2026-10-21 22:59:49,409 INFO topology_builder: Scenario 1001: links per class Extremely Low 29, Low 1, High 0, Extremely High 7
+2026-10-21 22:59:59,420 INFO run_experiment: === scenario 1: hop_count ===
+2026-10-21 23:00:02,125 INFO run_experiment: hop_count routes over s15-s14-s11-s8-s12-s19-s23 (ground truth: Extremely High; Stage 1 0.52 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:01:35,361 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:01:35,507 INFO multimedia_evaluator: [hop_count] PSNR None dB, SSIM None, video loss 82.89 %, RTT 13065.909 ms, jitter 18.288 ms, 0.78 Mbit/s
+2026-10-21 23:01:35,509 INFO run_experiment: === scenario 1: qos_aware ===
+2026-10-21 23:01:57,503 INFO run_experiment: qos_aware routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Low; Stage 1 0.48 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:03:30,525 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:03:30,672 INFO multimedia_evaluator: [qos_aware] PSNR None dB, SSIM None, video loss 0.00 %, RTT 148.46 ms, jitter 13.573 ms, 4.66 Mbit/s
+2026-10-21 23:03:30,673 INFO run_experiment: === scenario 1: bandwidth ===
+2026-10-21 23:03:53,931 INFO run_experiment: bandwidth routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Low; Stage 1 1.95 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:05:27,098 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:05:27,278 INFO multimedia_evaluator: [bandwidth] PSNR None dB, SSIM None, video loss 0.00 %, RTT 147.642 ms, jitter 13.742 ms, 4.58 Mbit/s
+2026-10-21 23:05:27,280 INFO run_experiment: === scenario 1: hop_ml ===
+2026-10-21 23:09:04,149 INFO telemetry_and_model:   candidate 0 s15-s14-s11-s8-s12-s19-s23: Extremely High (composite 2089.532, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:09:04,149 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s12-s19-s23: Extremely High (composite 1046.313, 0.00 Mbit/s, rtt 7172 ms)
+2026-10-21 23:09:04,155 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s18-s21-s22-s23: Low (composite 3.094, 5.86 Mbit/s, rtt 122 ms)
+2026-10-21 23:09:04,156 INFO telemetry_and_model:   candidate 3 s15-s14-s11-s7-s8-s12-s19-s23: Extremely High (composite 1690.140, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:09:04,156 INFO telemetry_and_model:   candidate 4 s15-s14-s11-s8-s18-s21-s22-s23: Extremely High (composite 1046.774, 0.00 Mbit/s, rtt 7195 ms)
+2026-10-21 23:09:04,449 INFO run_experiment: hop_ml routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Low; Stage 1 24.40 ms, Stage 2 inference 386.78 ms)
+2026-10-21 23:10:37,644 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:10:37,802 INFO multimedia_evaluator: [hop_ml] PSNR None dB, SSIM None, video loss 0.00 %, RTT 155.254 ms, jitter 14.169 ms, 4.62 Mbit/s
+2026-10-21 23:10:37,803 INFO run_experiment: === scenario 1: advanced ===
+2026-10-21 23:12:15,966 INFO telemetry_and_model:   candidate 0 s15-s16-s17-s18-s21-s22-s23: Low (composite 3.028, 6.03 Mbit/s, rtt 121 ms)
+2026-10-21 23:12:15,967 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s18-s21-s22-s23: Low (composite 3.429, 5.93 Mbit/s, rtt 141 ms)
+2026-10-21 23:12:15,968 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s8-s6-s9-s12-s21-s22-s23: Low (composite 4.347, 5.76 Mbit/s, rtt 182 ms)
+2026-10-21 23:12:15,968 INFO telemetry_and_model:   candidate 3 s15-s16-s17-s8-s6-s1-s9-s12-s21-s22-s23: Low (composite 4.771, 5.59 Mbit/s, rtt 201 ms)
+2026-10-21 23:12:15,968 INFO telemetry_and_model:   candidate 4 s15-s16-s17-s18-s8-s6-s9-s12-s21-s22-s23: Low (composite 4.887, 5.58 Mbit/s, rtt 202 ms)
+2026-10-21 23:12:16,336 INFO run_experiment: advanced routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Low; Stage 1 30.39 ms, Stage 2 inference 347.06 ms)
+2026-10-21 23:13:49,531 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:13:49,688 INFO multimedia_evaluator: [advanced] PSNR None dB, SSIM None, video loss 0.00 %, RTT 166.05 ms, jitter 13.257 ms, 4.62 Mbit/s
+2026-10-21 23:13:53,761 INFO topology_builder: Scenario 1002: links per class Extremely Low 26, Low 3, High 1, Extremely High 7
+2026-10-21 23:14:03,769 INFO run_experiment: === scenario 2: hop_count ===
+2026-10-21 23:14:06,460 INFO run_experiment: hop_count routes over s15-s14-s11-s8-s12-s19-s23 (ground truth: Extremely High; Stage 1 2.65 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:15:39,772 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:15:39,909 INFO multimedia_evaluator: [hop_count] PSNR None dB, SSIM None, video loss 81.21 %, RTT 12726.333 ms, jitter 16.196 ms, 0.82 Mbit/s
+2026-10-21 23:15:39,910 INFO run_experiment: === scenario 2: qos_aware ===
+2026-10-21 23:16:02,007 INFO run_experiment: qos_aware routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 0.54 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:17:35,264 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:17:35,431 INFO multimedia_evaluator: [qos_aware] PSNR None dB, SSIM None, video loss 0.00 %, RTT 145.417 ms, jitter 13.425 ms, 4.64 Mbit/s
+2026-10-21 23:17:35,433 INFO run_experiment: === scenario 2: bandwidth ===
+2026-10-21 23:17:58,563 INFO run_experiment: bandwidth routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 0.34 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:19:31,558 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:19:31,774 INFO multimedia_evaluator: [bandwidth] PSNR None dB, SSIM None, video loss 0.00 %, RTT 142.412 ms, jitter 13.069 ms, 4.65 Mbit/s
+2026-10-21 23:19:31,776 INFO run_experiment: === scenario 2: hop_ml ===
+2026-10-21 23:23:11,426 INFO telemetry_and_model:   candidate 0 s15-s14-s11-s8-s12-s19-s23: Extremely High (composite 2401.588, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:23:11,426 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s12-s19-s23: Extremely High (composite 1204.015, 0.00 Mbit/s, rtt 7174 ms)
+2026-10-21 23:23:11,426 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s18-s21-s22-s23: Extremely Low (composite 2.766, 6.95 Mbit/s, rtt 120 ms)
+2026-10-21 23:23:11,426 INFO telemetry_and_model:   candidate 3 s15-s14-s11-s7-s8-s12-s19-s23: Extremely High (composite 2002.160, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:23:11,427 INFO telemetry_and_model:   candidate 4 s15-s14-s11-s8-s18-s21-s22-s23: Extremely High (composite 1203.010, 0.00 Mbit/s, rtt 7207 ms)
+2026-10-21 23:23:11,897 INFO run_experiment: hop_ml routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 16.91 ms, Stage 2 inference 495.47 ms)
+2026-10-21 23:24:45,099 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:24:45,241 INFO multimedia_evaluator: [hop_ml] PSNR None dB, SSIM None, video loss 0.00 %, RTT 140.783 ms, jitter 12.941 ms, 4.64 Mbit/s
+2026-10-21 23:24:45,248 INFO run_experiment: === scenario 2: advanced ===
+2026-10-21 23:26:21,107 INFO telemetry_and_model:   candidate 0 s15-s16-s17-s18-s21-s22-s23: Extremely Low (composite 2.760, 6.94 Mbit/s, rtt 120 ms)
+2026-10-21 23:26:21,110 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s18-s8-s6-s9-s12-s21-s22-s23: Low (composite 4.975, 4.77 Mbit/s, rtt 201 ms)
+2026-10-21 23:26:21,111 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s8-s18-s21-s22-s23: High (composite 5.420, 2.37 Mbit/s, rtt 151 ms)
+2026-10-21 23:26:21,114 INFO telemetry_and_model:   candidate 3 s15-s16-s17-s8-s6-s9-s12-s21-s22-s23: High (composite 6.016, 2.18 Mbit/s, rtt 186 ms)
+2026-10-21 23:26:21,114 INFO telemetry_and_model:   candidate 4 s15-s16-s17-s8-s6-s9-s13-s12-s21-s22-s23: High (composite 6.459, 2.58 Mbit/s, rtt 210 ms)
+2026-10-21 23:26:21,491 INFO run_experiment: advanced routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 23.34 ms, Stage 2 inference 328.06 ms)
+2026-10-21 23:27:54,272 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:27:54,444 INFO multimedia_evaluator: [advanced] PSNR None dB, SSIM None, video loss 0.00 %, RTT 142.264 ms, jitter 12.879 ms, 4.63 Mbit/s
+2026-10-21 23:28:03,518 INFO topology_builder: Scenario 1003: links per class Extremely Low 24, Low 0, High 3, Extremely High 10
+2026-10-21 23:28:13,523 INFO run_experiment: === scenario 3: hop_count ===
+2026-10-21 23:28:16,298 INFO run_experiment: hop_count routes over s15-s14-s11-s8-s12-s19-s23 (ground truth: Extremely High; Stage 1 0.68 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:29:49,499 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:29:49,634 INFO multimedia_evaluator: [hop_count] PSNR None dB, SSIM None, video loss 81.92 %, RTT 13542.3 ms, jitter 18.857 ms, 0.77 Mbit/s
+2026-10-21 23:29:49,636 INFO run_experiment: === scenario 3: qos_aware ===
+2026-10-21 23:30:11,747 INFO run_experiment: qos_aware routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: High; Stage 1 0.46 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:31:44,576 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:31:44,722 INFO multimedia_evaluator: [qos_aware] PSNR None dB, SSIM None, video loss 2.03 %, RTT 991.5 ms, jitter 16.323 ms, 4.46 Mbit/s
+2026-10-21 23:31:44,725 INFO run_experiment: === scenario 3: bandwidth ===
+2026-10-21 23:32:07,643 INFO run_experiment: bandwidth routes over s15-s16-s17-s8-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 0.90 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:33:40,646 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:33:40,820 INFO multimedia_evaluator: [bandwidth] PSNR None dB, SSIM None, video loss 0.00 %, RTT 157.167 ms, jitter 12.235 ms, 4.61 Mbit/s
+2026-10-21 23:33:40,842 INFO run_experiment: === scenario 3: hop_ml ===
+2026-10-21 23:37:16,409 INFO telemetry_and_model:   candidate 0 s15-s14-s11-s8-s12-s19-s23: Extremely High (composite 2401.579, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:37:16,410 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s12-s19-s23: Extremely High (composite 1202.178, 0.00 Mbit/s, rtt 7174 ms)
+2026-10-21 23:37:16,410 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s18-s21-s22-s23: High (composite 3.180, 4.42 Mbit/s, rtt 123 ms)
+2026-10-21 23:37:16,410 INFO telemetry_and_model:   candidate 3 s15-s14-s11-s7-s8-s12-s19-s23: Extremely High (composite 2006.225, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:37:16,410 INFO telemetry_and_model:   candidate 4 s15-s14-s11-s8-s18-s21-s22-s23: Extremely High (composite 1202.571, 0.00 Mbit/s, rtt 7190 ms)
+2026-10-21 23:37:16,761 INFO run_experiment: hop_ml routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: High; Stage 1 15.56 ms, Stage 2 inference 292.18 ms)
+2026-10-21 23:38:49,735 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:38:49,915 INFO multimedia_evaluator: [hop_ml] PSNR None dB, SSIM None, video loss 1.48 %, RTT 1004.632 ms, jitter 15.556 ms, 4.51 Mbit/s
+2026-10-21 23:38:49,940 INFO run_experiment: === scenario 3: advanced ===
+2026-10-21 23:41:57,246 INFO telemetry_and_model:   candidate 0 s15-s16-s17-s8-s18-s21-s22-s23: Extremely Low (composite 3.170, 7.18 Mbit/s, rtt 140 ms)
+2026-10-21 23:41:57,246 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s18-s21-s22-s23: High (composite 3.259, 4.42 Mbit/s, rtt 121 ms)
+2026-10-21 23:41:57,246 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s8-s6-s9-s12-s21-s22-s23: Extremely High (composite 404.371, 0.00 Mbit/s, rtt 2503 ms)
+2026-10-21 23:41:57,247 INFO telemetry_and_model:   candidate 3 s15-s16-s17-s8-s6-s9-s13-s12-s21-s22-s23: Extremely High (composite 404.867, 0.00 Mbit/s, rtt 2532 ms)
+2026-10-21 23:41:57,247 INFO telemetry_and_model:   candidate 4 s15-s16-s17-s18-s8-s6-s9-s12-s21-s22-s23: Extremely High (composite 405.333, 0.00 Mbit/s, rtt 2522 ms)
+2026-10-21 23:41:57,663 INFO run_experiment: advanced routes over s15-s16-s17-s8-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 22.87 ms, Stage 2 inference 451.15 ms)
+2026-10-21 23:43:30,564 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:43:30,725 INFO multimedia_evaluator: [advanced] PSNR None dB, SSIM None, video loss 0.00 %, RTT 163.25 ms, jitter 12.138 ms, 4.61 Mbit/s
+2026-10-21 23:43:34,812 INFO topology_builder: Scenario 1004: links per class Extremely Low 29, Low 1, High 0, Extremely High 7
+2026-10-21 23:43:44,819 INFO run_experiment: === scenario 4: hop_count ===
+2026-10-21 23:43:47,562 INFO run_experiment: hop_count routes over s15-s14-s11-s8-s12-s19-s23 (ground truth: Extremely High; Stage 1 6.49 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:45:20,319 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:45:20,474 INFO multimedia_evaluator: [hop_count] PSNR None dB, SSIM None, video loss 84.30 %, RTT 12708.625 ms, jitter 16.115 ms, 0.67 Mbit/s
+2026-10-21 23:45:20,476 INFO run_experiment: === scenario 4: qos_aware ===
+2026-10-21 23:45:43,032 INFO run_experiment: qos_aware routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 1.40 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:47:16,276 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:47:16,474 INFO multimedia_evaluator: [qos_aware] PSNR None dB, SSIM None, video loss 0.00 %, RTT 143.567 ms, jitter 13.557 ms, 4.65 Mbit/s
+2026-10-21 23:47:16,490 INFO run_experiment: === scenario 4: bandwidth ===
+2026-10-21 23:47:38,443 INFO run_experiment: bandwidth routes over s15-s16-s17-s8-s6-s1-s9-s12-s21-s22-s23 (ground truth: Extremely Low; Stage 1 9.77 ms, Stage 2 inference 0.00 ms)
+2026-10-21 23:49:11,284 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:49:11,442 INFO multimedia_evaluator: [bandwidth] PSNR None dB, SSIM None, video loss 0.00 %, RTT 222.867 ms, jitter 13.103 ms, 4.59 Mbit/s
+2026-10-21 23:49:11,445 INFO run_experiment: === scenario 4: hop_ml ===
+2026-10-21 23:52:51,998 INFO telemetry_and_model:   candidate 0 s15-s14-s11-s8-s12-s19-s23: Extremely High (composite 2401.579, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:52:52,001 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s12-s19-s23: Extremely High (composite 1202.242, 0.00 Mbit/s, rtt 7169 ms)
+2026-10-21 23:52:52,001 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s18-s21-s22-s23: Extremely Low (composite 2.783, 6.76 Mbit/s, rtt 121 ms)
+2026-10-21 23:52:52,001 INFO telemetry_and_model:   candidate 3 s15-s14-s11-s7-s8-s12-s19-s23: Extremely High (composite 2002.644, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:52:52,001 INFO telemetry_and_model:   candidate 4 s15-s14-s11-s8-s18-s21-s22-s23: Extremely High (composite 1602.365, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-21 23:52:52,384 INFO run_experiment: hop_ml routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 21.22 ms, Stage 2 inference 450.30 ms)
+2026-10-21 23:54:25,161 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:54:25,335 INFO multimedia_evaluator: [hop_ml] PSNR None dB, SSIM None, video loss 0.00 %, RTT 152.638 ms, jitter 13.961 ms, 4.63 Mbit/s
+2026-10-21 23:54:25,350 INFO run_experiment: === scenario 4: advanced ===
+2026-10-21 23:56:32,037 INFO telemetry_and_model:   candidate 0 s15-s16-s17-s18-s21-s22-s23: Extremely Low (composite 2.780, 6.76 Mbit/s, rtt 120 ms)
+2026-10-21 23:56:32,037 INFO telemetry_and_model:   candidate 1 s15-s16-s17-s8-s6-s9-s12-s21-s22-s23: Extremely Low (composite 4.071, 6.61 Mbit/s, rtt 181 ms)
+2026-10-21 23:56:32,037 INFO telemetry_and_model:   candidate 2 s15-s16-s17-s8-s6-s1-s9-s12-s21-s22-s23: Extremely Low (composite 4.530, 6.43 Mbit/s, rtt 201 ms)
+2026-10-21 23:56:32,037 INFO telemetry_and_model:   candidate 3 s15-s16-s17-s8-s6-s9-s13-s12-s21-s22-s23: Extremely Low (composite 4.608, 6.43 Mbit/s, rtt 201 ms)
+2026-10-21 23:56:32,037 INFO telemetry_and_model:   candidate 4 s15-s16-s17-s8-s12-s21-s22-s23: Extremely High (composite 402.968, 0.00 Mbit/s, rtt 2464 ms)
+2026-10-21 23:56:32,322 INFO run_experiment: advanced routes over s15-s16-s17-s18-s21-s22-s23 (ground truth: Extremely Low; Stage 1 33.40 ms, Stage 2 inference 186.22 ms)
+2026-10-21 23:58:05,678 WARNING multimedia_evaluator: No frame of the received video could be decoded
+2026-10-21 23:58:05,837 INFO multimedia_evaluator: [advanced] PSNR None dB, SSIM None, video loss 0.00 %, RTT 135.789 ms, jitter 12.928 ms, 4.63 Mbit/s
+2026-10-21 23:58:17,526 INFO run_experiment: Results in /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/results/advanced/geant2_20261021_224332
+*** Ping: testing ping reachability
+h0 -> h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h1 -> h0 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h2 -> h0 h1 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h3 -> h0 h1 h2 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h4 -> h0 h1 h2 h3 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h5 -> h0 h1 h2 h3 h4 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h6 -> h0 h1 h2 h3 h4 h5 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h7 -> h0 h1 h2 h3 h4 h5 h6 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h8 -> h0 h1 h2 h3 h4 h5 h6 h7 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h9 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h10 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h11 h12 h13 h14 h15 h16 h17 h18 h19 
+h11 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h12 h13 h14 h15 h16 h17 h18 h19 
+h12 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h13 h14 h15 h16 h17 h18 h19 
+h13 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h14 h15 h16 h17 h18 h19 
+h14 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h15 h16 h17 h18 h19 
+h15 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h16 h17 h18 h19 
+h16 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h17 h18 h19 
+h17 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h18 h19 
+h18 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h19 
+h19 -> h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12 h13 h14 h15 h16 h17 h18 
+*** Results: 0% dropped (380/380 received)
+h12 -> h18 
+h18 -> h12 
+*** Results: 0% dropped (2/2 received)
+2026-10-21 23:59:24,625 INFO topology_builder: Pinned 64 background flows on 32 links
+2026-10-21 23:59:28,663 INFO topology_builder: Scenario 1000: links per class Extremely Low 22, Low 3, High 0, Extremely High 7
+2026-10-21 23:59:38,673 INFO run_experiment: === scenario 0: hop_count ===
+2026-10-21 23:59:40,902 INFO run_experiment: hop_count routes over s12-s4-s0-s10-s18 (ground truth: Extremely High; Stage 1 0.55 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:03:47,336 INFO multimedia_evaluator: [hop_count] PSNR 15.137219 dB, SSIM 0.751366, video loss 78.26 %, RTT 8646.067 ms, jitter 10.344 ms, 0.95 Mbit/s
+2026-10-22 00:03:47,337 INFO run_experiment: === scenario 0: qos_aware ===
+2026-10-22 00:04:09,523 INFO run_experiment: qos_aware routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 7.08 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:09:11,442 INFO multimedia_evaluator: [qos_aware] PSNR 16.648707 dB, SSIM 0.777748, video loss 13.82 %, RTT 1225.898 ms, jitter 13.157 ms, 3.95 Mbit/s
+2026-10-22 00:09:11,452 INFO run_experiment: === scenario 0: bandwidth ===
+2026-10-22 00:09:32,878 INFO run_experiment: bandwidth routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 1.32 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:14:30,718 INFO multimedia_evaluator: [bandwidth] PSNR 16.487784 dB, SSIM 0.775337, video loss 11.49 %, RTT 1223.98 ms, jitter 13.221 ms, 4.01 Mbit/s
+2026-10-22 00:14:30,722 INFO run_experiment: === scenario 0: hop_ml ===
+2026-10-22 00:17:33,358 INFO telemetry_and_model:   candidate 0 s12-s4-s0-s10-s18: Extremely High (composite 13.825, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 00:17:33,360 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: High (composite 3.129, 1.85 Mbit/s, rtt 90 ms)
+2026-10-22 00:17:33,360 INFO telemetry_and_model:   candidate 2 s12-s4-s1-s10-s18: Extremely High (composite 7.937, 0.00 Mbit/s, rtt 4728 ms)
+2026-10-22 00:17:33,360 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s11-s18: High (composite 3.239, 1.70 Mbit/s, rtt 92 ms)
+2026-10-22 00:17:33,360 INFO telemetry_and_model:   candidate 4 s12-s4-s0-s6-s1-s10-s18: Extremely High (composite 11.803, 0.00 Mbit/s, rtt 7178 ms)
+2026-10-22 00:17:33,570 INFO run_experiment: hop_ml routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 9.48 ms, Stage 2 inference 354.49 ms)
+2026-10-22 00:22:21,990 INFO multimedia_evaluator: [hop_ml] PSNR 16.656687 dB, SSIM 0.776831, video loss 13.00 %, RTT 1222.042 ms, jitter 14.178 ms, 3.94 Mbit/s
+2026-10-22 00:22:22,001 INFO run_experiment: === scenario 0: advanced ===
+2026-10-22 00:23:52,759 INFO telemetry_and_model:   candidate 0 s12-s5-s2-s11-s18: Extremely High (composite 4.897, 1.84 Mbit/s, rtt 89 ms)
+2026-10-22 00:23:52,760 INFO telemetry_and_model:   candidate 1 s12-s5-s3-s11-s18: Extremely High (composite 5.028, 1.84 Mbit/s, rtt 182 ms)
+2026-10-22 00:23:52,760 INFO telemetry_and_model:   candidate 2 s12-s5-s3-s9-s2-s11-s18: Extremely High (composite 5.783, 1.85 Mbit/s, rtt 203 ms)
+2026-10-22 00:23:52,760 INFO telemetry_and_model:   candidate 3 s12-s5-s2-s9-s3-s11-s18: Extremely High (composite 5.915, 1.52 Mbit/s, rtt 163 ms)
+2026-10-22 00:23:52,760 INFO telemetry_and_model:   candidate 4 s12-s5-s13-s4-s1-s10-s19-s11-s18: Extremely High (composite 7.257, 1.95 Mbit/s, rtt 170 ms)
+2026-10-22 00:23:53,023 INFO run_experiment: advanced routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 8.40 ms, Stage 2 inference 294.78 ms)
+2026-10-22 00:28:46,724 INFO multimedia_evaluator: [advanced] PSNR 16.875036 dB, SSIM 0.779087, video loss 12.52 %, RTT 1227.333 ms, jitter 14.108 ms, 4.00 Mbit/s
+2026-10-22 00:28:50,790 INFO topology_builder: Scenario 1001: links per class Extremely Low 24, Low 2, High 1, Extremely High 5
+2026-10-22 00:29:00,797 INFO run_experiment: === scenario 1: hop_count ===
+2026-10-22 00:29:03,251 INFO run_experiment: hop_count routes over s12-s4-s0-s10-s18 (ground truth: Extremely High; Stage 1 0.49 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:33:08,334 INFO multimedia_evaluator: [hop_count] PSNR 14.289459 dB, SSIM 0.729085, video loss 78.26 %, RTT 8359.947 ms, jitter 10.459 ms, 0.94 Mbit/s
+2026-10-22 00:33:08,347 INFO run_experiment: === scenario 1: qos_aware ===
+2026-10-22 00:33:29,725 INFO run_experiment: qos_aware routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 0.35 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:36:59,113 INFO multimedia_evaluator: [qos_aware] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 96.345 ms, jitter 13.515 ms, 4.63 Mbit/s
+2026-10-22 00:36:59,122 INFO run_experiment: === scenario 1: bandwidth ===
+2026-10-22 00:37:21,244 INFO run_experiment: bandwidth routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 1.20 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:40:46,879 INFO multimedia_evaluator: [bandwidth] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 105.033 ms, jitter 13.51 ms, 4.63 Mbit/s
+2026-10-22 00:40:46,885 INFO run_experiment: === scenario 1: hop_ml ===
+2026-10-22 00:43:32,723 INFO telemetry_and_model:   candidate 0 s12-s4-s0-s10-s18: Extremely High (composite 1600.494, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 00:43:32,723 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: High (composite 2.515, 3.78 Mbit/s, rtt 84 ms)
+2026-10-22 00:43:32,723 INFO telemetry_and_model:   candidate 2 s12-s4-s1-s10-s18: Extremely High (composite 801.536, 0.00 Mbit/s, rtt 4728 ms)
+2026-10-22 00:43:32,723 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s11-s18: Extremely Low (composite 1.847, 6.84 Mbit/s, rtt 80 ms)
+2026-10-22 00:43:32,723 INFO telemetry_and_model:   candidate 4 s12-s4-s0-s6-s1-s10-s18: Extremely High (composite 1201.648, 0.00 Mbit/s, rtt 7174 ms)
+2026-10-22 00:43:32,945 INFO run_experiment: hop_ml routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 5.42 ms, Stage 2 inference 370.06 ms)
+2026-10-22 00:46:53,088 INFO multimedia_evaluator: [hop_ml] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 93.004 ms, jitter 12.388 ms, 4.62 Mbit/s
+2026-10-22 00:46:53,098 INFO run_experiment: === scenario 1: advanced ===
+2026-10-22 00:48:23,166 INFO telemetry_and_model:   candidate 0 s12-s5-s3-s11-s18: Extremely Low (composite 1.866, 6.85 Mbit/s, rtt 80 ms)
+2026-10-22 00:48:23,176 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: High (composite 2.668, 3.79 Mbit/s, rtt 82 ms)
+2026-10-22 00:48:23,176 INFO telemetry_and_model:   candidate 2 s12-s5-s2-s9-s3-s11-s18: Extremely Low (composite 2.800, 6.76 Mbit/s, rtt 120 ms)
+2026-10-22 00:48:23,176 INFO telemetry_and_model:   candidate 3 s12-s5-s2-s7-s3-s11-s18: Extremely Low (composite 2.834, 6.74 Mbit/s, rtt 121 ms)
+2026-10-22 00:48:23,176 INFO telemetry_and_model:   candidate 4 s12-s5-s3-s9-s2-s11-s18: High (composite 3.614, 4.00 Mbit/s, rtt 123 ms)
+2026-10-22 00:48:23,386 INFO run_experiment: advanced routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 10.21 ms, Stage 2 inference 343.43 ms)
+2026-10-22 00:51:54,240 INFO multimedia_evaluator: [advanced] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 94.381 ms, jitter 12.63 ms, 4.64 Mbit/s
+2026-10-22 00:51:58,300 INFO topology_builder: Scenario 1002: links per class Extremely Low 23, Low 2, High 2, Extremely High 5
+2026-10-22 00:52:08,303 INFO run_experiment: === scenario 2: hop_count ===
+2026-10-22 00:52:11,707 INFO run_experiment: hop_count routes over s12-s4-s0-s10-s18 (ground truth: Extremely High; Stage 1 0.48 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:56:07,066 INFO multimedia_evaluator: [hop_count] PSNR 14.859723 dB, SSIM 0.749323, video loss 79.68 %, RTT 8690.556 ms, jitter 9.388 ms, 0.91 Mbit/s
+2026-10-22 00:56:07,089 INFO run_experiment: === scenario 2: qos_aware ===
+2026-10-22 00:56:28,548 INFO run_experiment: qos_aware routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 5.15 ms, Stage 2 inference 0.00 ms)
+2026-10-22 00:59:51,945 INFO multimedia_evaluator: [qos_aware] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 95.604 ms, jitter 11.482 ms, 4.63 Mbit/s
+2026-10-22 00:59:51,949 INFO run_experiment: === scenario 2: bandwidth ===
+2026-10-22 01:00:14,201 INFO run_experiment: bandwidth routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 1.69 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:03:50,803 INFO multimedia_evaluator: [bandwidth] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 108.553 ms, jitter 13.195 ms, 4.64 Mbit/s
+2026-10-22 01:03:50,815 INFO run_experiment: === scenario 2: hop_ml ===
+2026-10-22 01:06:56,387 INFO telemetry_and_model:   candidate 0 s12-s4-s0-s10-s18: Extremely High (composite 1601.196, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 01:06:56,387 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: Extremely Low (composite 1.858, 7.44 Mbit/s, rtt 80 ms)
+2026-10-22 01:06:56,387 INFO telemetry_and_model:   candidate 2 s12-s4-s1-s10-s18: Extremely High (composite 802.293, 0.00 Mbit/s, rtt 4736 ms)
+2026-10-22 01:06:56,387 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s11-s18: Extremely Low (composite 1.821, 7.44 Mbit/s, rtt 80 ms)
+2026-10-22 01:06:56,388 INFO telemetry_and_model:   candidate 4 s12-s4-s0-s6-s1-s10-s18: Extremely High (composite 1202.540, 0.00 Mbit/s, rtt 7182 ms)
+2026-10-22 01:06:56,609 INFO run_experiment: hop_ml routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 1.67 ms, Stage 2 inference 295.47 ms)
+2026-10-22 01:10:41,235 INFO multimedia_evaluator: [hop_ml] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 110.083 ms, jitter 11.25 ms, 4.65 Mbit/s
+2026-10-22 01:10:41,249 INFO run_experiment: === scenario 2: advanced ===
+2026-10-22 01:12:09,311 INFO telemetry_and_model:   candidate 0 s12-s5-s3-s11-s18: Extremely Low (composite 1.813, 7.46 Mbit/s, rtt 80 ms)
+2026-10-22 01:12:09,311 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: Extremely Low (composite 1.849, 7.45 Mbit/s, rtt 80 ms)
+2026-10-22 01:12:09,311 INFO telemetry_and_model:   candidate 2 s12-s5-s2-s7-s3-s11-s18: Extremely Low (composite 2.745, 7.16 Mbit/s, rtt 120 ms)
+2026-10-22 01:12:09,311 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s7-s2-s11-s18: Extremely Low (composite 2.758, 7.16 Mbit/s, rtt 120 ms)
+2026-10-22 01:12:09,312 INFO telemetry_and_model:   candidate 4 s12-s5-s2-s9-s3-s11-s18: Low (composite 3.033, 4.84 Mbit/s, rtt 123 ms)
+2026-10-22 01:12:09,531 INFO run_experiment: advanced routes over s12-s5-s3-s11-s18 (ground truth: Extremely Low; Stage 1 9.71 ms, Stage 2 inference 380.80 ms)
+2026-10-22 01:15:38,450 INFO multimedia_evaluator: [advanced] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 101.138 ms, jitter 12.095 ms, 4.61 Mbit/s
+2026-10-22 01:15:42,529 INFO topology_builder: Scenario 1003: links per class Extremely Low 16, Low 4, High 1, Extremely High 11
+2026-10-22 01:15:52,539 INFO run_experiment: === scenario 3: hop_count ===
+2026-10-22 01:15:54,975 INFO run_experiment: hop_count routes over s12-s4-s0-s10-s18 (ground truth: Extremely High; Stage 1 0.52 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:20:45,462 INFO multimedia_evaluator: [hop_count] PSNR 15.244452 dB, SSIM 0.752294, video loss 76.67 %, RTT 8622.182 ms, jitter 10.865 ms, 1.05 Mbit/s
+2026-10-22 01:20:45,470 INFO run_experiment: === scenario 3: qos_aware ===
+2026-10-22 01:21:07,369 INFO run_experiment: qos_aware routes over s12-s5-s3-s11-s18 (ground truth: Extremely High; Stage 1 0.52 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:26:09,478 INFO multimedia_evaluator: [qos_aware] PSNR 15.269954 dB, SSIM 0.740764, video loss 27.08 %, RTT 3544.125 ms, jitter 15.353 ms, 3.23 Mbit/s
+2026-10-22 01:26:09,496 INFO run_experiment: === scenario 3: bandwidth ===
+2026-10-22 01:26:30,944 INFO run_experiment: bandwidth routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 7.36 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:31:23,647 INFO multimedia_evaluator: [bandwidth] PSNR 15.331654 dB, SSIM 0.734569, video loss 21.58 %, RTT 2425.027 ms, jitter 13.435 ms, 3.59 Mbit/s
+2026-10-22 01:31:23,667 INFO run_experiment: === scenario 3: hop_ml ===
+2026-10-22 01:35:26,522 INFO telemetry_and_model:   candidate 0 s12-s4-s0-s10-s18: Extremely High (composite 1601.188, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 01:35:26,528 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: Extremely High (composite 401.736, 0.00 Mbit/s, rtt 2405 ms)
+2026-10-22 01:35:26,531 INFO telemetry_and_model:   candidate 2 s12-s4-s1-s10-s18: Extremely High (composite 1201.247, 0.00 Mbit/s, rtt 7131 ms)
+2026-10-22 01:35:26,531 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s11-s18: Extremely High (composite 404.719, 0.00 Mbit/s, rtt 2408 ms)
+2026-10-22 01:35:26,531 INFO telemetry_and_model:   candidate 4 s12-s4-s0-s6-s1-s10-s18: Extremely High (composite 1602.607, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 01:35:26,744 INFO run_experiment: hop_ml routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 8.00 ms, Stage 2 inference 391.66 ms)
+2026-10-22 01:40:20,740 INFO multimedia_evaluator: [hop_ml] PSNR 15.784143 dB, SSIM 0.747164, video loss 16.39 %, RTT 2414.538 ms, jitter 12.648 ms, 3.83 Mbit/s
+2026-10-22 01:40:20,774 INFO run_experiment: === scenario 3: advanced ===
+2026-10-22 01:44:24,887 INFO telemetry_and_model:   candidate 0 s12-s5-s2-s11-s18: Extremely High (composite 401.735, 0.00 Mbit/s, rtt 2404 ms)
+2026-10-22 01:44:24,887 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s9-s3-s11-s18: Extremely High (composite 402.651, 0.00 Mbit/s, rtt 2442 ms)
+2026-10-22 01:44:24,887 INFO telemetry_and_model:   candidate 2 s12-s5-s2-s11-s19-s10-s18: Extremely High (composite 402.796, 0.00 Mbit/s, rtt 2441 ms)
+2026-10-22 01:44:24,887 INFO telemetry_and_model:   candidate 3 s12-s5-s2-s7-s3-s11-s18: Extremely High (composite 403.042, 0.00 Mbit/s, rtt 2448 ms)
+2026-10-22 01:44:24,887 INFO telemetry_and_model:   candidate 4 s12-s5-s2-s9-s3-s11-s19-s10-s18: Extremely High (composite 403.712, 0.00 Mbit/s, rtt 2482 ms)
+2026-10-22 01:44:25,133 INFO run_experiment: advanced routes over s12-s5-s2-s11-s18 (ground truth: Extremely High; Stage 1 20.51 ms, Stage 2 inference 344.23 ms)
+2026-10-22 01:49:16,509 INFO multimedia_evaluator: [advanced] PSNR 14.042081 dB, SSIM 0.69101, video loss 20.49 %, RTT 2414.613 ms, jitter 13.263 ms, 3.69 Mbit/s
+2026-10-22 01:49:20,585 INFO topology_builder: Scenario 1004: links per class Extremely Low 23, Low 3, High 1, Extremely High 5
+2026-10-22 01:49:30,591 INFO run_experiment: === scenario 4: hop_count ===
+2026-10-22 01:49:33,014 INFO run_experiment: hop_count routes over s12-s4-s0-s10-s18 (ground truth: Extremely High; Stage 1 4.18 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:53:28,151 INFO multimedia_evaluator: [hop_count] PSNR 14.998232 dB, SSIM 0.748849, video loss 78.85 %, RTT 8716.7 ms, jitter 11.067 ms, 0.94 Mbit/s
+2026-10-22 01:53:28,164 INFO run_experiment: === scenario 4: qos_aware ===
+2026-10-22 01:53:50,696 INFO run_experiment: qos_aware routes over s12-s5-s2-s11-s18 (ground truth: Low; Stage 1 0.29 ms, Stage 2 inference 0.00 ms)
+2026-10-22 01:57:24,483 INFO multimedia_evaluator: [qos_aware] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 132.525 ms, jitter 15.879 ms, 4.62 Mbit/s
+2026-10-22 01:57:24,499 INFO run_experiment: === scenario 4: bandwidth ===
+2026-10-22 01:57:45,844 INFO run_experiment: bandwidth routes over s12-s5-s2-s11-s18 (ground truth: Low; Stage 1 4.59 ms, Stage 2 inference 0.00 ms)
+2026-10-22 02:01:11,219 INFO multimedia_evaluator: [bandwidth] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 127.957 ms, jitter 16.287 ms, 4.63 Mbit/s
+2026-10-22 02:01:11,232 INFO run_experiment: === scenario 4: hop_ml ===
+2026-10-22 02:04:13,249 INFO telemetry_and_model:   candidate 0 s12-s4-s0-s10-s18: Extremely High (composite 1578.493, 0.00 Mbit/s, rtt 5000 ms)
+2026-10-22 02:04:13,261 INFO telemetry_and_model:   candidate 1 s12-s5-s2-s11-s18: Low (composite 2.513, 5.82 Mbit/s, rtt 81 ms)
+2026-10-22 02:04:13,261 INFO telemetry_and_model:   candidate 2 s12-s4-s1-s10-s18: Extremely High (composite 801.706, 0.00 Mbit/s, rtt 4734 ms)
+2026-10-22 02:04:13,261 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s11-s18: Low (composite 2.689, 5.64 Mbit/s, rtt 82 ms)
+2026-10-22 02:04:13,261 INFO telemetry_and_model:   candidate 4 s12-s4-s0-s6-s1-s10-s18: Extremely High (composite 1179.992, 0.00 Mbit/s, rtt 7184 ms)
+2026-10-22 02:04:13,537 INFO run_experiment: hop_ml routes over s12-s5-s2-s11-s18 (ground truth: Low; Stage 1 0.91 ms, Stage 2 inference 440.57 ms)
+2026-10-22 02:07:54,461 INFO multimedia_evaluator: [hop_ml] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 127.048 ms, jitter 15.685 ms, 4.61 Mbit/s
+2026-10-22 02:07:54,476 INFO run_experiment: === scenario 4: advanced ===
+2026-10-22 02:09:21,698 INFO telemetry_and_model:   candidate 0 s12-s5-s2-s11-s18: Low (composite 2.120, 5.83 Mbit/s, rtt 81 ms)
+2026-10-22 02:09:21,699 INFO telemetry_and_model:   candidate 1 s12-s5-s3-s11-s18: Low (composite 2.297, 5.63 Mbit/s, rtt 82 ms)
+2026-10-22 02:09:21,699 INFO telemetry_and_model:   candidate 2 s12-s5-s3-s7-s2-s11-s18: Low (composite 3.140, 5.65 Mbit/s, rtt 122 ms)
+2026-10-22 02:09:21,700 INFO telemetry_and_model:   candidate 3 s12-s5-s3-s9-s2-s11-s18: Low (composite 3.208, 5.66 Mbit/s, rtt 122 ms)
+2026-10-22 02:09:21,700 INFO telemetry_and_model:   candidate 4 s12-s5-s2-s7-s3-s11-s18: Low (composite 3.326, 5.46 Mbit/s, rtt 121 ms)
+2026-10-22 02:09:21,919 INFO run_experiment: advanced routes over s12-s5-s2-s11-s18 (ground truth: Low; Stage 1 12.53 ms, Stage 2 inference 282.18 ms)
+2026-10-22 02:12:51,629 INFO multimedia_evaluator: [advanced] PSNR 38.427967 dB, SSIM 0.997639, video loss 0.00 %, RTT 122.527 ms, jitter 14.647 ms, 4.63 Mbit/s
+2026-10-22 02:12:57,394 INFO run_experiment: Results in /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/results/advanced/fattree_20261021_235820
+2026-10-22 02:12:59,557 INFO multimedia_evaluator: Re-scoring 25 videos in results/advanced/geant2_20261021_224332 with ffmpeg
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_0/advanced: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_0/bandwidth: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_0/hop_count: PSNR 14.207924 dB, SSIM 0.728418, 820 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_0/hop_ml: PSNR 17.590595 dB, SSIM 0.810722, 3512 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_0/qos_aware: PSNR 17.908906 dB, SSIM 0.809805, 3481 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_1/advanced: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_1/bandwidth: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_1/hop_count: PSNR 15.069126 dB, SSIM 0.740643, 844 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_1/hop_ml: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_1/qos_aware: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_2/advanced: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_2/bandwidth: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_2/hop_count: PSNR 14.792501 dB, SSIM 0.737808, 978 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_2/hop_ml: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_2/qos_aware: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_3/advanced: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_3/bandwidth: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_3/hop_count: PSNR 14.835619 dB, SSIM 0.743933, 1052 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_3/hop_ml: PSNR 23.922092 dB, SSIM 0.944345, 3932 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_3/qos_aware: PSNR 23.467701 dB, SSIM 0.941167, 3932 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_4/advanced: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_4/bandwidth: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_4/hop_count: PSNR 14.96623 dB, SSIM 0.745179, 935 frames
+2026-10-22 02:17:04,327 INFO multimedia_evaluator:   scenario_4/hop_ml: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:04,328 INFO multimedia_evaluator:   scenario_4/qos_aware: PSNR 38.427967 dB, SSIM 0.997639, 3968 frames
+2026-10-22 02:17:16,977 INFO final_results: Wrote /home/anshul/Documents/Anshul/coding/projects/SDN-routing-multi-class/final_results
+final results: final_results/  (runs: results/advanced/geant2_20261021_224332, results/advanced/fattree_20261021_235820)
